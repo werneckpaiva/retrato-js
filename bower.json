@@ -23,8 +23,6 @@
     "tests"
   ],
   "main": [
-    "src/album.js",
-    "src/highlight.js",
-    "src/resize.js"
+    "dist/js/retrato.js"
   ]
 }
