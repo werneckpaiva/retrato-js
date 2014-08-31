@@ -1,0 +1,20 @@
+{
+  "name": "Sample album 1",
+  "version": "0.0.1",
+  "homepage": "https://github.com/werneckpaiva/retrato-js",
+  "authors": [
+    "Ricardo Paiva <werneck.paiva@gmail.com>"
+  ],
+  "description": "Sample Album 1",
+  "keywords": [
+    "photo",
+    "album"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "jquery": "~2.1.1",
+    "mustache.js": "~0.8.2",
+    "retrato-js": "~0.0.1",
+    "watch": "*"
+  }
+}
