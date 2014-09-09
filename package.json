@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/werneckpaiva/retrato-js",
   "devDependencies": {
-    "jasmine-node": "^1.14.3",
+    "jasmine-node": "^2.0",
     "grunt": "^0.4.5",
     "load-grunt-tasks": "^0.5.0",
     "grunt-contrib-concat": "^0.4.0",

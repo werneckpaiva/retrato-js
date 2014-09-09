@@ -23,24 +23,24 @@ function Highlight(model, conf){
         $detailsView = conf.detailsView;
 
         watch(model, "selectedPictureIndex", function(){
-            onPictureSelected()
+            onPictureSelected();
             updateDetailValues();
         });
         watch(model, "detailsOn", function(){
             if (model.detailsOn){
-                showDetails()
+                showDetails();
             } else {
-                hideDetails()
+                hideDetails();
             }
         });
 
         $view.click(function(){
-            self.close()
-        })
+            self.close();
+        });
 
         $(window).resize(function(){
             self.updateDisplay();
-        })
+        });
 
         $('body').keyup(function (event) {
             if (event.keyCode == 37){
@@ -55,7 +55,7 @@ function Highlight(model, conf){
 
     function onPictureSelected(){
         if (isOpened) {
-            if (model.selectedPictureIndex == null){
+            if (model.selectedPictureIndex === null){
                 self.close();
             }
             return;
@@ -71,28 +71,27 @@ function Highlight(model, conf){
     }
     
     this.handleScroll = function(){
-        $('body').on('mousewheel', disableScroll)
-    }
+        $('body').on('mousewheel', disableScroll);
+    };
 
     this.unhandleScroll = function(){
-        $('body').off('mousewheel', disableScroll)
-    }
-    
-    this.hasPicturesToDisplay = function(){
-        return (model.selectedPictureIndex!=null
-                && model.selectedPictureIndex >= 0
-                && model.pictures
-                && model.pictures.length>=0);
+        $('body').off('mousewheel', disableScroll);
+    };
 
-    }
-    
+    this.hasPicturesToDisplay = function(){
+        return (model.selectedPictureIndex !== null && 
+                model.selectedPictureIndex >= 0 && 
+                model.pictures && 
+                model.pictures.length>=0);
+    };
+
     this.close = function(){
         isOpened = false;
         self.unhandleScroll();
         $view.fadeOut("slow");
         model.selectedPictureIndex = null;
-        Fullscreen.close()
-    }
+        Fullscreen.close();
+    };
 
     function createHighlight(){
         var $frame = $(Mustache.render(template, {}));
@@ -105,36 +104,36 @@ function Highlight(model, conf){
             return;
         }
         isOpened = true;
-        $viewList.empty()
+        $viewList.empty();
         createCurrentHighlight();
         createLeftHighlight();
         createRightHighlight();
         self.updateDisplay();
-    }
+    };
 
     // Move from left to right
     this.displayPrevPicture = function(){
         if (!self.hasPicturesToDisplay()) return;
-        $viewList.find(".large-photo").stop()
-        if (model.selectedPictureIndex == 0) return;
+        $viewList.find(".large-photo").stop();
+        if (model.selectedPictureIndex === 0) return;
 
         var newRightPicture = model.pictures[model.selectedPictureIndex];
         model.selectedPictureIndex--;
 
         var newCurrentFrame = prevFrame;
-        newCurrentFrame.removeClass("prev-frame").addClass("current-frame")
-        var newCurrentPicture = model.pictures[model.selectedPictureIndex]
+        newCurrentFrame.removeClass("prev-frame").addClass("current-frame");
+        var newCurrentPicture = model.pictures[model.selectedPictureIndex];
         var newCurrentDimension = calculateDimension(newCurrentPicture);
         newCurrentFrame.find(".box-blur").hide();
         newCurrentFrame.find(".large-photo").animate({
             left: newCurrentDimension.x
         }, 500, "swing", function(){
             showBlur(newCurrentFrame, newCurrentPicture);
-            showHighResolution(newCurrentFrame, newCurrentPicture)
+            showHighResolution(newCurrentFrame, newCurrentPicture);
         });
 
-        var newRightFrame = currentFrame
-        newRightFrame.removeClass("current-frame").addClass("next-frame")
+        var newRightFrame = currentFrame;
+        newRightFrame.removeClass("current-frame").addClass("next-frame");
         var newRightDimension = calculateDimensionRight(newRightPicture);
         newRightFrame.find(".large-photo").animate({
             left: newRightDimension.x
@@ -147,37 +146,37 @@ function Highlight(model, conf){
 
         // Set Image to the new Left
         if (model.selectedPictureIndex > 0){
-            createLeftHighlight()
+            createLeftHighlight();
             var newLeftPicture = model.pictures[model.selectedPictureIndex - 1];
             var dimension = calculateDimensionLeft(newLeftPicture);
-            setPosition(prevFrame, dimension)
-            showLowResolution(prevFrame, newLeftPicture)
+            setPosition(prevFrame, dimension);
+            showLowResolution(prevFrame, newLeftPicture);
         }
-    }
+    };
 
     // Move from right to left
     this.displayNextPicture = function(){
         if (!self.hasPicturesToDisplay()) return;
-        $viewList.find(".large-photo").stop()
+        $viewList.find(".large-photo").stop();
         if (model.selectedPictureIndex >= (model.pictures.length - 1)) return;
 
         var newLeftPicture = model.pictures[model.selectedPictureIndex];
         model.selectedPictureIndex++;
 
         var newCurrentFrame = nextFrame;
-        newCurrentFrame.removeClass("next-frame").addClass("current-frame")
-        var newCurrentPicture = model.pictures[model.selectedPictureIndex]
+        newCurrentFrame.removeClass("next-frame").addClass("current-frame");
+        var newCurrentPicture = model.pictures[model.selectedPictureIndex];
         var newCurrentDimension = calculateDimension(newCurrentPicture);
         newCurrentFrame.find(".box-blur").hide();
         newCurrentFrame.find(".large-photo").animate({
             left: newCurrentDimension.x
         }, 500, "swing", function(){
-            showBlur(newCurrentFrame, newCurrentPicture)
-            showHighResolution(newCurrentFrame, newCurrentPicture)
+            showBlur(newCurrentFrame, newCurrentPicture);
+            showHighResolution(newCurrentFrame, newCurrentPicture);
         });
 
         var newLeftFrame = currentFrame;
-        newLeftFrame.removeClass("current-frame").addClass("prev-frame")
+        newLeftFrame.removeClass("current-frame").addClass("prev-frame");
         var newLeftDimension = calculateDimensionLeft(newLeftPicture);
         newLeftFrame.find(".large-photo").animate({
             left: newLeftDimension.x
@@ -190,13 +189,13 @@ function Highlight(model, conf){
 
         // Set Image to the new Right
         if (model.selectedPictureIndex < (model.pictures.length - 1)){
-            createRightHighlight()
+            createRightHighlight();
             var newRightPicture = model.pictures[model.selectedPictureIndex + 1];
             var dimension = calculateDimensionRight(newRightPicture);
-            setPosition(nextFrame, dimension)
-            showLowResolution(nextFrame, newRightPicture)
+            setPosition(nextFrame, dimension);
+            showLowResolution(nextFrame, newRightPicture);
         }
-    }
+    };
 
     function createCurrentHighlight(){
         currentFrame = createHighlight();
@@ -222,29 +221,30 @@ function Highlight(model, conf){
         if (!self.hasPicturesToDisplay()) return;
         if (!isOpened) return;
         $view.fadeIn("slow");
+        var picture, dimension;
         if (currentFrame) {
-            var picture = model.pictures[model.selectedPictureIndex]
-            var dimension = calculateDimension(picture);
-            setPosition(currentFrame, dimension)
-            showLowResolution(currentFrame, picture)
-            showHighResolution(currentFrame, picture)
+            picture = model.pictures[model.selectedPictureIndex].
+            dimension = calculateDimension(picture);
+            setPosition(currentFrame, dimension);
+            showLowResolution(currentFrame, picture);
+            showHighResolution(currentFrame, picture);
             if (!currentFrame.find('.box-blur').is(':visible')){
-                showBlur(currentFrame, picture)
+                showBlur(currentFrame, picture);
             }
         }
         if (prevFrame && model.selectedPictureIndex > 0) {
-            var picture = model.pictures[model.selectedPictureIndex - 1]
-            var dimension = calculateDimensionLeft(picture);
+            picture = model.pictures[model.selectedPictureIndex - 1];
+            dimension = calculateDimensionLeft(picture);
             setPosition(prevFrame, dimension);
-            showLowResolution(prevFrame, picture)
+            showLowResolution(prevFrame, picture);
         }
         if (nextFrame && model.selectedPictureIndex < model.pictures.length - 1) {
-            var picture = model.pictures[model.selectedPictureIndex + 1]
-            var dimension = calculateDimensionRight(picture);
+            picture = model.pictures[model.selectedPictureIndex + 1];
+            dimension = calculateDimensionRight(picture);
             setPosition(nextFrame, dimension);
-            showLowResolution(nextFrame, picture)
+            showLowResolution(nextFrame, picture);
         }
-    }
+    };
 
     function calculateDimension(picture){
         var $window = $view;
@@ -258,7 +258,7 @@ function Highlight(model, conf){
         var newWidth = windowWidth - (padding * 2);
         var newHeight = Math.round(newWidth / picture.ratio);
         var x = 0;
-        var y = Math.round((windowHeight - newHeight) / 2)
+        var y = Math.round((windowHeight - newHeight) / 2);
         if (y < headerHeight){
             newHeight = windowHeight - (headerHeight + (padding * 2));
             newWidth = Math.round(newHeight * picture.ratio);
@@ -267,40 +267,40 @@ function Highlight(model, conf){
         }
         x = (windowWidth - newWidth) / 2;
         y = ((windowHeight - headerHeight - newHeight) / 2) + headerHeight;
-        return {newWidth: newWidth, newHeight: newHeight, x:x, y:y}
+        return {newWidth: newWidth, newHeight: newHeight, x:x, y:y};
     }
 
     function calculateDimensionLeft(picture){
         var dimension = calculateDimension(picture);
         dimension.x = -1 * dimension.newWidth - 50;
-        return dimension
+        return dimension;
     }
 
     function calculateDimensionRight(picture){
         var dimension = calculateDimension(picture);
         dimension.x = $view.width() + 50;
-        return dimension
+        return dimension;
     }
 
     function showHighResolution(frame, picture){
         var $highRes = frame.find(".high-res");
-        $highRes.hide()
+        $highRes.hide();
 
-        image = new Image()
+        image = new Image();
         image.onload = function(){
             $highRes.attr("src", this.src);
             $highRes.fadeIn();
-        }
+        };
         image.src = picture.highlight;
     }
 
     function showLowResolution(frame, picture){
         var $lowRes = frame.find(".low-res");
-        $lowRes.attr("src", picture.thumb)
+        $lowRes.attr("src", picture.thumb);
     }
 
     function setPosition(frame, dimension){
-        var largePhoto = frame.find(".large-photo")
+        var largePhoto = frame.find(".large-photo");
         largePhoto.css("left", dimension.x+"px").css("top", dimension.y+"px");
         largePhoto.css("width", dimension.newWidth+"px").css("height", dimension.newHeight+"px");
     }
@@ -316,16 +316,16 @@ function Highlight(model, conf){
 
     function showBlur(frame, picture){
         self.blurTimeout = setTimeout(function(){
-            var blur = frame.find('.box-blur').hide()
-            blur.fadeIn(2000)
+            var blur = frame.find('.box-blur').hide();
+            blur.fadeIn(2000);
             boxBlurImage(frame.find('.low-res').get(0), blur.get(0), 20, false, 2);
-            blur.show()
+            blur.show();
         }, 500);
     }
 
     function showDetails(){
         $detailsView.animate({right: 0}, 500);
-        var p = model.pictures[model.selectedPictureIndex]
+        var p = model.pictures[model.selectedPictureIndex];
         var dimension = calculateDimension(p);
         animateToPosition(currentFrame, dimension);
     }
@@ -340,7 +340,7 @@ function Highlight(model, conf){
     }
 
     function updateDetailValues(){
-        var picture = model.pictures[model.selectedPictureIndex]
+        var picture = model.pictures[model.selectedPictureIndex];
         if (!picture) return;
         $detailsView.find(".file-name").html(picture.filename);
         $detailsView.find(".file-date").html(picture.date);

@@ -1,7 +1,7 @@
 function AlbumModel(albumDelegate){
 
-    var delegate = albumDelegate
-    var self = this
+    var delegate = albumDelegate;
+    var self = this;
 
     this.path = null;
     this.albuns = null;
@@ -15,11 +15,9 @@ function AlbumModel(albumDelegate){
     this.detailsOn = false;
 
     this.loadAlbum = function(albumPath){
-        albumPath = albumPath.replace(Settings.URL_PREFIX, '')
-        console.log("loading: "+albumPath);
-        self.loading = true
+        self.loading = true;
         delegate.get(albumPath, loadAlbumResultHandler, loadAlbumFailHandler);
-    }
+    };
 
     function loadAlbumResultHandler(result){
         for (var prop in result){
@@ -27,29 +25,55 @@ function AlbumModel(albumDelegate){
                 self[prop] = result[prop];
             }
         }
-        console.log(self)
-        self.loading = false
+        self.loading = false;
         self.selectedPictureIndex = null;
     }
 
     function loadAlbumFailHandler(error){
-        self.loading = false
-        alert("Album does not exist")
+        self.loading = false;
+        alert("Album does not exist");
     }
 
     return this;
 }
 
-function AlbumDelegate(){
+function AlbumAjaxDelegate(){
 
     this.get = function(albumPath, resultHandler, failHandler){
-        var url = Settings.URL_DATA_PREFIX + albumPath;
+        var url = albumPath.replace(Settings.URL_PREFIX, '');
+        url = Settings.URL_DATA_PREFIX + url;
         url = StringUtil.sanitizeUrl(url);
-        console.log("URL: "+url)
         $.get(url, function(result) {
-            resultHandler(result)
+            resultHandler(result);
         }).fail(function(status){
-            failHandler(status)
+            failHandler(status);
         });
-    }
+    };
+}
+
+function AlbumHtmlDelegate(imgs){
+    this.get = function(albumPath, resultHandler, failHandler){
+        if (imgs.length === 0){
+            return failHandler();
+        }
+        var result = {
+                path: albumPath,
+                pictures: []
+        };
+        imgs.each(function(i, element){
+            $el = $(element);
+            var ratio = parseFloat($el.attr("width")) / parseFloat($el.attr("height"));
+            ratio = Math.round(ratio * 1000) / 1000;
+            var picture = {
+                    width: $el.attr("width"),
+                    height: $el.attr("height"),
+                    thumb: $el.attr("src"),
+                    url: $el.data("photo"),
+                    highlight: $el.data("photo"),
+                    ratio: ratio
+            };
+            result.pictures.push(picture);
+        });
+        resultHandler(result);
+    };
 }

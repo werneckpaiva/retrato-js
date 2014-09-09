@@ -12,7 +12,8 @@
   "license": "Apache",
   "dependencies": {
     "jquery": "~2.1.1",
-    "mustache.js": "~0.8.2"
+    "mustache.js": "~0.8.2",
+    "watch": "*"
   },
   "ignore": [
     "**/.*",

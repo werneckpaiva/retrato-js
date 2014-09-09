@@ -41,11 +41,19 @@ module.exports = function(grunt) {
             }   
         }, 
         jasmine : {
-            minesweeper: {
+            retrato: {
                 src : '<%= config.src %>/**/*.js',
+                version: '2.0.0',
+                tasks: 'jasmine:pivotal:build',
                 options: {
+                    keepRunner: true,
                     specs : 'spec/**/*Spec.js',
-                    helpers : 'spec/helpers/*.js'
+                    helpers : 'spec/helpers/*.js',
+                    vendor: [
+                       'bower_components/jquery/dist/jquery.js',
+                       'bower_components/mustache.js/mustache.js',
+                       'bower_components/watch/src/watch.js',
+                    ]
                 }
             }
         },
