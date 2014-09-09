@@ -1,19 +1,19 @@
 var Settings = {
     URL_PREFIX: "/",
     URL_DATA_PREFIX: "/api/"
-}
+};
 
 var StringUtil = {
     sanitizeUrl: function(url){
         url = url.replace(/([^:])[\/]+/g, '$1/');
-        return url
+        return url;
     },
     humanizeName: function(name){
         name = name.replace(/_/g, " ");
         name = name.replace(/\.jpe?g/i, "");
-        return name
+        return name;
     }
-}
+};
 
 
 var Fullscreen = {
@@ -49,16 +49,16 @@ var Fullscreen = {
     },
 
     isActive: function(){
-       return document.fullScreenElement != null 
-                    || document.webkitCurrentFullScreenElement != null
-                    || document.mozFullScreenElement != null
-                    || document.msFullscreenElement != null
+       return document.fullScreenElement !== null || 
+           document.webkitCurrentFullScreenElement !== null || 
+           document.mozFullScreenElement !== null || 
+           document.msFullscreenElement !== null;
     }
-}
+};
 
 function Loading(model, conf){
 
-    var $view = null
+    var $view = null;
 
     function init(){
         $view = conf.view;
@@ -98,14 +98,14 @@ function AlbumNavigator(model, conf){
     }
     
     function displayAlbuns(){
-        if(!model.albuns || model.albuns.length == 0){
+        if(!model.albuns || model.albuns.length === 0){
             $view.removeClass("visible");
             return;
         }
         $view.addClass("visible");
         content = "";
         for (var i=0; i<model.albuns.length; i++){
-            var albumName = model.albuns[i]
+            var albumName = model.albuns[i];
             content += Mustache.render(template, {
                 url: getAlbumUrl(albumName), 
                 name: StringUtil.humanizeName(albumName)});
@@ -118,8 +118,8 @@ function AlbumNavigator(model, conf){
         $view.find("a").click(function(event){
             event.preventDefault();
             $('html,body').animate({scrollTop:0}, 500);
-            model.loadAlbum($(this).attr("href"))
-        })
+            model.loadAlbum($(this).attr("href"));
+        });
     }
 
     init();
@@ -136,12 +136,12 @@ function AlbumBreadcrumb(model, conf){
 
     function init(){
         $view = conf.view;
-        $viewList = (conf.listClass)? $view.find("."+conf.listClass) : $view
-        templateHome = conf.templateHome
-        template = conf.template
+        $viewList = (conf.listClass)? $view.find("."+conf.listClass) : $view;
+        templateHome = conf.templateHome;
+        template = conf.template;
         
         watch(model, "path", function(){
-            self.updatePath()
+            self.updatePath();
         });
 
         watch(model, "selectedPictureIndex", function(){
@@ -157,38 +157,38 @@ function AlbumBreadcrumb(model, conf){
 
     this.updatePath = function(){
         var parts = model.path.split("/");
-        if (parts[parts.length - 1]==""){
+        if (parts[parts.length - 1]===""){
             parts.pop();
         }
-        if (model.selectedPictureIndex != null){
+        if (model.selectedPictureIndex !== null){
             var p = model.pictures[model.selectedPictureIndex];
             parts.push(p.filename);
         }
-        var partial = '/'
+        var partial = '/';
         var content = Mustache.render(templateHome, {
             url: StringUtil.sanitizeUrl(Settings.URL_PREFIX + '/')
         });
         for (var i=1; i<parts.length; i++){
             partial += parts[i] + '/';
-            params = {}
+            params = {};
             if (i < parts.length - 1){
                 params.url = StringUtil.sanitizeUrl(Settings.URL_PREFIX + partial);
             }
-            params.name = StringUtil.humanizeName(parts[i])
+            params.name = StringUtil.humanizeName(parts[i]);
             content += Mustache.render(template, params);
         }
-        $viewList.html(content)
+        $viewList.html(content);
         enableAsynchronous();
-    }
+    };
 
     function enableAsynchronous(){
         $viewList.find("a").click(function(){
             model.loadAlbum($(this).attr("href"));
             return false;
-        })
+        });
     }
 
-    init()
+    init();
 }
 
 
@@ -203,7 +203,7 @@ function AlbumMenu(model, conf){
     function init(){
         $view = conf.view;
         $detailsButton = conf.detailsButton;
-        $fullscreenButton = conf.fullscreenButton
+        $fullscreenButton = conf.fullscreenButton;
 
         watch(model, "selectedPictureIndex", function(){
             pinMenu();
@@ -219,7 +219,7 @@ function AlbumMenu(model, conf){
         $fullscreenButton.click(function(event){
             event.preventDefault();
             openCloseFullscreen();
-        })
+        });
 
         Fullscreen.onchange(function(event){
             $fullscreenButton.toggleClass("selected", Fullscreen.isActive());
@@ -230,14 +230,14 @@ function AlbumMenu(model, conf){
     }
 
     function pinMenu(){
-        if (model.selectedPictureIndex != null){
-            $view.addClass("headroom--pinned").addClass("headroom--top")
-            $view.removeClass("headroom--not-top").removeClass("headroom--unpinned")
+        if (model.selectedPictureIndex !== null){
+            $view.addClass("headroom--pinned").addClass("headroom--top");
+            $view.removeClass("headroom--not-top").removeClass("headroom--unpinned");
         }
     }
 
     function showHideDetailsButton(){
-        if (model.selectedPictureIndex == null){
+        if (model.selectedPictureIndex === null){
             model.detailsOn = false;
             $detailsButton.hide();
         } else {
@@ -251,7 +251,7 @@ function AlbumMenu(model, conf){
     }
 
     function showHideFullscreenButton(){
-        if (model.selectedPictureIndex == null){
+        if (model.selectedPictureIndex === null){
             model.detailsOn = false;
             $fullscreenButton.hide();
         } else {
@@ -267,7 +267,7 @@ function AlbumMenu(model, conf){
         }
     }
 
-    init()
+    init();
 }
 
 
@@ -277,33 +277,33 @@ function AlbumDeepLinking(model){
 
     function init(){
         watch(model, "path", function(){
-            updateUrl()
+            updateUrl();
         });
 
         $(window).bind('popstate', function(event){
-            changeAlbumFromUrl()
-        })
+            changeAlbumFromUrl();
+        });
 
-        changeAlbumFromUrl()
+        changeAlbumFromUrl();
     }
 
     function extractPathFromUrl(){
-        var albumPath = location.pathname
-        albumPath = albumPath.replace(Settings.URL_PREFIX, "")
+        var albumPath = location.pathname;
+        albumPath = albumPath.replace(Settings.URL_PREFIX, "");
         if (!albumPath){
-            albumPath = "/"
+            albumPath = "/";
         }
         return albumPath;
     }
 
     function updateUrl(){
-        var currentAlbumPath = location.pathname
-        var newPath = Settings.URL_PREFIX + model.path
+        var currentAlbumPath = location.pathname;
+        var newPath = Settings.URL_PREFIX + model.path;
         if (currentAlbumPath == newPath){
             return;
         }
-        newPath = StringUtil.sanitizeUrl(newPath)
-        history.pushState(null, null, newPath)
+        newPath = StringUtil.sanitizeUrl(newPath);
+        history.pushState(null, null, newPath);
     }
 
     function changeAlbumFromUrl(){
@@ -330,20 +330,20 @@ function AlbumPhotos(model, conf){
 
     function init(){
         $view = conf.view;
-        $viewList = (conf.listClass)? $view.find("."+conf.listClass) : $view
-        template = conf.template
+        $viewList = (conf.listClass)? $view.find("."+conf.listClass) : $view;
+        template = conf.template;
         if (conf.heightProportion){
-            heightProportion = conf.heightProportion
+            heightProportion = conf.heightProportion;
         }
 
         watch(model, "pictures", function(prop, action, newvalue, oldvalue){
-            var picturesChanged = Array.isArray(newvalue)
+            var picturesChanged = Array.isArray(newvalue);
             self.displayPictures(picturesChanged);
         });
 
         $(window).resize(function(){
             self.resizePictures();
-        })
+        });
     }
 
 //    this.picturesChanged = function(){
@@ -364,81 +364,81 @@ function AlbumPhotos(model, conf){
         if (picturesChanged===false){
             return;
         }
-        
+
         $viewList.empty();
-        if(!model.pictures || model.pictures.length == 0){
+        if(!model.pictures || model.pictures.length === 0){
             $view.hide();
             return;
         }
         $view.show();
 
         var resize = new Resize(model.pictures, heightProportion);
-        currentWidth = $view.width()
-        console.log("currentWidth: "+currentWidth)
+        currentWidth = $view.width();
+        console.log("currentWidth: "+currentWidth);
         var newPictures = resize.doResize(currentWidth, $(window).height());
 
         content = "";
         for (var i=0; i<newPictures.length; i++){
-            var p = newPictures[i]
+            var p = newPictures[i];
             var params = {
                     width: p.newWidth-margin,
                     height: p.newHeight-margin
-            }
+            };
             if (!conf.lazyLoad){
-                params.src = p.thumb 
+                params.src = p.thumb;
             }
             content += Mustache.render(template, params);
         }
         $viewList.html(content);
         $viewList.find("img").click(function(){
             model.selectedPictureIndex = $(this).data("index");
-        })
+        });
         if (conf.lazyLoad){
             lazyLoad();
         }
-    }
+    };
 
     this.resizePictures = function(){
-        var newWidth = $view.width()
+        var newWidth = $view.width();
         if (newWidth == currentWidth) return;
-        currentWidth = $view.width()
+        currentWidth = $view.width();
         var resize = new Resize(model.pictures, heightProportion);
         var newPictures = resize.doResize(currentWidth, $(window).height());
         $viewList.children().each(function(index, item){
-            var p = newPictures[index]
+            var p = newPictures[index];
             var width = (p.newWidth-margin);
             var height = (p.newHeight-margin);
-            $(this).css("width", width).css("height", height)
-            $(this).find("img").attr("width", width).attr("height", height)
-        })
-    }
-    
+            $(this).css("width", width).css("height", height);
+            $(this).find("img").attr("width", width).attr("height", height);
+        });
+    };
+
     function lazyLoad(){
 
         function loadNextPicture(){
             if (index >= model.pictures.length){
-                return
+                return;
             }
-            $viewList.find("img:eq("+index+")").data("index", index)
+            $viewList.find("img:eq("+index+")").data("index", index);
             if (image.src == model.pictures[index].thumb){
                 index++;
                 loadNextPicture();
             } else {
-                image.src = model.pictures[index].thumb
+                image.src = model.pictures[index].thumb;
             }
         }
 
         var index = 0;
-        var image = new Image()
+        var image = new Image();
         image.onload = function(){
             $viewList.find("img:eq("+index+")")
                 .attr("src", this.src)
-                .show()
-            index++
-            loadNextPicture()
-        }
-        
-        loadNextPicture()
+                .show();
+            index++;
+            loadNextPicture();
+        };
+
+        loadNextPicture();
     }
 
     init();
@@ -448,7 +448,7 @@ function AlbumPageTitle(model, conf){
 
     var template = 'Album {{title}}';
     var templateEmpty = '';
-    var separator = ' | '
+    var separator = ' | ';
 
     function init(){
         if (conf && conf.template) {
@@ -460,7 +460,7 @@ function AlbumPageTitle(model, conf){
             templateEmpty = template;
         }
         watch(model, "path", function(){
-            self.updateTitle()
+            self.updateTitle();
         });
         watch(model, "selectedPictureIndex", function(){
             self.updateTitle();
@@ -472,14 +472,14 @@ function AlbumPageTitle(model, conf){
         path = path.replace(/^\//, '');
         path = path.replace(/\/$/, '');
         path = path.replace(/[\/]+/g,  separator);
-        var newTitle = ''
+        var newTitle = '';
         if (path){
             newTitle = Mustache.render(template, {title: path});
         } else {
             newTitle = Mustache.render(templateEmpty);
         }
-        document.title = newTitle
-    }
+        document.title = newTitle;
+    };
     
     init();
 };function Highlight(model, conf){
@@ -507,24 +507,24 @@ function AlbumPageTitle(model, conf){
         $detailsView = conf.detailsView;
 
         watch(model, "selectedPictureIndex", function(){
-            onPictureSelected()
+            onPictureSelected();
             updateDetailValues();
         });
         watch(model, "detailsOn", function(){
             if (model.detailsOn){
-                showDetails()
+                showDetails();
             } else {
-                hideDetails()
+                hideDetails();
             }
         });
 
         $view.click(function(){
-            self.close()
-        })
+            self.close();
+        });
 
         $(window).resize(function(){
             self.updateDisplay();
-        })
+        });
 
         $('body').keyup(function (event) {
             if (event.keyCode == 37){
@@ -539,7 +539,7 @@ function AlbumPageTitle(model, conf){
 
     function onPictureSelected(){
         if (isOpened) {
-            if (model.selectedPictureIndex == null){
+            if (model.selectedPictureIndex === null){
                 self.close();
             }
             return;
@@ -555,28 +555,27 @@ function AlbumPageTitle(model, conf){
     }
     
     this.handleScroll = function(){
-        $('body').on('mousewheel', disableScroll)
-    }
+        $('body').on('mousewheel', disableScroll);
+    };
 
     this.unhandleScroll = function(){
-        $('body').off('mousewheel', disableScroll)
-    }
-    
-    this.hasPicturesToDisplay = function(){
-        return (model.selectedPictureIndex!=null
-                && model.selectedPictureIndex >= 0
-                && model.pictures
-                && model.pictures.length>=0);
+        $('body').off('mousewheel', disableScroll);
+    };
 
-    }
-    
+    this.hasPicturesToDisplay = function(){
+        return (model.selectedPictureIndex !== null && 
+                model.selectedPictureIndex >= 0 && 
+                model.pictures && 
+                model.pictures.length>=0);
+    };
+
     this.close = function(){
         isOpened = false;
         self.unhandleScroll();
         $view.fadeOut("slow");
         model.selectedPictureIndex = null;
-        Fullscreen.close()
-    }
+        Fullscreen.close();
+    };
 
     function createHighlight(){
         var $frame = $(Mustache.render(template, {}));
@@ -589,36 +588,36 @@ function AlbumPageTitle(model, conf){
             return;
         }
         isOpened = true;
-        $viewList.empty()
+        $viewList.empty();
         createCurrentHighlight();
         createLeftHighlight();
         createRightHighlight();
         self.updateDisplay();
-    }
+    };
 
     // Move from left to right
     this.displayPrevPicture = function(){
         if (!self.hasPicturesToDisplay()) return;
-        $viewList.find(".large-photo").stop()
-        if (model.selectedPictureIndex == 0) return;
+        $viewList.find(".large-photo").stop();
+        if (model.selectedPictureIndex === 0) return;
 
         var newRightPicture = model.pictures[model.selectedPictureIndex];
         model.selectedPictureIndex--;
 
         var newCurrentFrame = prevFrame;
-        newCurrentFrame.removeClass("prev-frame").addClass("current-frame")
-        var newCurrentPicture = model.pictures[model.selectedPictureIndex]
+        newCurrentFrame.removeClass("prev-frame").addClass("current-frame");
+        var newCurrentPicture = model.pictures[model.selectedPictureIndex];
         var newCurrentDimension = calculateDimension(newCurrentPicture);
         newCurrentFrame.find(".box-blur").hide();
         newCurrentFrame.find(".large-photo").animate({
             left: newCurrentDimension.x
         }, 500, "swing", function(){
             showBlur(newCurrentFrame, newCurrentPicture);
-            showHighResolution(newCurrentFrame, newCurrentPicture)
+            showHighResolution(newCurrentFrame, newCurrentPicture);
         });
 
-        var newRightFrame = currentFrame
-        newRightFrame.removeClass("current-frame").addClass("next-frame")
+        var newRightFrame = currentFrame;
+        newRightFrame.removeClass("current-frame").addClass("next-frame");
         var newRightDimension = calculateDimensionRight(newRightPicture);
         newRightFrame.find(".large-photo").animate({
             left: newRightDimension.x
@@ -631,37 +630,37 @@ function AlbumPageTitle(model, conf){
 
         // Set Image to the new Left
         if (model.selectedPictureIndex > 0){
-            createLeftHighlight()
+            createLeftHighlight();
             var newLeftPicture = model.pictures[model.selectedPictureIndex - 1];
             var dimension = calculateDimensionLeft(newLeftPicture);
-            setPosition(prevFrame, dimension)
-            showLowResolution(prevFrame, newLeftPicture)
+            setPosition(prevFrame, dimension);
+            showLowResolution(prevFrame, newLeftPicture);
         }
-    }
+    };
 
     // Move from right to left
     this.displayNextPicture = function(){
         if (!self.hasPicturesToDisplay()) return;
-        $viewList.find(".large-photo").stop()
+        $viewList.find(".large-photo").stop();
         if (model.selectedPictureIndex >= (model.pictures.length - 1)) return;
 
         var newLeftPicture = model.pictures[model.selectedPictureIndex];
         model.selectedPictureIndex++;
 
         var newCurrentFrame = nextFrame;
-        newCurrentFrame.removeClass("next-frame").addClass("current-frame")
-        var newCurrentPicture = model.pictures[model.selectedPictureIndex]
+        newCurrentFrame.removeClass("next-frame").addClass("current-frame");
+        var newCurrentPicture = model.pictures[model.selectedPictureIndex];
         var newCurrentDimension = calculateDimension(newCurrentPicture);
         newCurrentFrame.find(".box-blur").hide();
         newCurrentFrame.find(".large-photo").animate({
             left: newCurrentDimension.x
         }, 500, "swing", function(){
-            showBlur(newCurrentFrame, newCurrentPicture)
-            showHighResolution(newCurrentFrame, newCurrentPicture)
+            showBlur(newCurrentFrame, newCurrentPicture);
+            showHighResolution(newCurrentFrame, newCurrentPicture);
         });
 
         var newLeftFrame = currentFrame;
-        newLeftFrame.removeClass("current-frame").addClass("prev-frame")
+        newLeftFrame.removeClass("current-frame").addClass("prev-frame");
         var newLeftDimension = calculateDimensionLeft(newLeftPicture);
         newLeftFrame.find(".large-photo").animate({
             left: newLeftDimension.x
@@ -674,13 +673,13 @@ function AlbumPageTitle(model, conf){
 
         // Set Image to the new Right
         if (model.selectedPictureIndex < (model.pictures.length - 1)){
-            createRightHighlight()
+            createRightHighlight();
             var newRightPicture = model.pictures[model.selectedPictureIndex + 1];
             var dimension = calculateDimensionRight(newRightPicture);
-            setPosition(nextFrame, dimension)
-            showLowResolution(nextFrame, newRightPicture)
+            setPosition(nextFrame, dimension);
+            showLowResolution(nextFrame, newRightPicture);
         }
-    }
+    };
 
     function createCurrentHighlight(){
         currentFrame = createHighlight();
@@ -706,29 +705,30 @@ function AlbumPageTitle(model, conf){
         if (!self.hasPicturesToDisplay()) return;
         if (!isOpened) return;
         $view.fadeIn("slow");
+        var picture, dimension;
         if (currentFrame) {
-            var picture = model.pictures[model.selectedPictureIndex]
-            var dimension = calculateDimension(picture);
-            setPosition(currentFrame, dimension)
-            showLowResolution(currentFrame, picture)
-            showHighResolution(currentFrame, picture)
+            picture = model.pictures[model.selectedPictureIndex].
+            dimension = calculateDimension(picture);
+            setPosition(currentFrame, dimension);
+            showLowResolution(currentFrame, picture);
+            showHighResolution(currentFrame, picture);
             if (!currentFrame.find('.box-blur').is(':visible')){
-                showBlur(currentFrame, picture)
+                showBlur(currentFrame, picture);
             }
         }
         if (prevFrame && model.selectedPictureIndex > 0) {
-            var picture = model.pictures[model.selectedPictureIndex - 1]
-            var dimension = calculateDimensionLeft(picture);
+            picture = model.pictures[model.selectedPictureIndex - 1];
+            dimension = calculateDimensionLeft(picture);
             setPosition(prevFrame, dimension);
-            showLowResolution(prevFrame, picture)
+            showLowResolution(prevFrame, picture);
         }
         if (nextFrame && model.selectedPictureIndex < model.pictures.length - 1) {
-            var picture = model.pictures[model.selectedPictureIndex + 1]
-            var dimension = calculateDimensionRight(picture);
+            picture = model.pictures[model.selectedPictureIndex + 1];
+            dimension = calculateDimensionRight(picture);
             setPosition(nextFrame, dimension);
-            showLowResolution(nextFrame, picture)
+            showLowResolution(nextFrame, picture);
         }
-    }
+    };
 
     function calculateDimension(picture){
         var $window = $view;
@@ -742,7 +742,7 @@ function AlbumPageTitle(model, conf){
         var newWidth = windowWidth - (padding * 2);
         var newHeight = Math.round(newWidth / picture.ratio);
         var x = 0;
-        var y = Math.round((windowHeight - newHeight) / 2)
+        var y = Math.round((windowHeight - newHeight) / 2);
         if (y < headerHeight){
             newHeight = windowHeight - (headerHeight + (padding * 2));
             newWidth = Math.round(newHeight * picture.ratio);
@@ -751,40 +751,40 @@ function AlbumPageTitle(model, conf){
         }
         x = (windowWidth - newWidth) / 2;
         y = ((windowHeight - headerHeight - newHeight) / 2) + headerHeight;
-        return {newWidth: newWidth, newHeight: newHeight, x:x, y:y}
+        return {newWidth: newWidth, newHeight: newHeight, x:x, y:y};
     }
 
     function calculateDimensionLeft(picture){
         var dimension = calculateDimension(picture);
         dimension.x = -1 * dimension.newWidth - 50;
-        return dimension
+        return dimension;
     }
 
     function calculateDimensionRight(picture){
         var dimension = calculateDimension(picture);
         dimension.x = $view.width() + 50;
-        return dimension
+        return dimension;
     }
 
     function showHighResolution(frame, picture){
         var $highRes = frame.find(".high-res");
-        $highRes.hide()
+        $highRes.hide();
 
-        image = new Image()
+        image = new Image();
         image.onload = function(){
             $highRes.attr("src", this.src);
             $highRes.fadeIn();
-        }
+        };
         image.src = picture.highlight;
     }
 
     function showLowResolution(frame, picture){
         var $lowRes = frame.find(".low-res");
-        $lowRes.attr("src", picture.thumb)
+        $lowRes.attr("src", picture.thumb);
     }
 
     function setPosition(frame, dimension){
-        var largePhoto = frame.find(".large-photo")
+        var largePhoto = frame.find(".large-photo");
         largePhoto.css("left", dimension.x+"px").css("top", dimension.y+"px");
         largePhoto.css("width", dimension.newWidth+"px").css("height", dimension.newHeight+"px");
     }
@@ -800,16 +800,16 @@ function AlbumPageTitle(model, conf){
 
     function showBlur(frame, picture){
         self.blurTimeout = setTimeout(function(){
-            var blur = frame.find('.box-blur').hide()
-            blur.fadeIn(2000)
+            var blur = frame.find('.box-blur').hide();
+            blur.fadeIn(2000);
             boxBlurImage(frame.find('.low-res').get(0), blur.get(0), 20, false, 2);
-            blur.show()
+            blur.show();
         }, 500);
     }
 
     function showDetails(){
         $detailsView.animate({right: 0}, 500);
-        var p = model.pictures[model.selectedPictureIndex]
+        var p = model.pictures[model.selectedPictureIndex];
         var dimension = calculateDimension(p);
         animateToPosition(currentFrame, dimension);
     }
@@ -824,7 +824,7 @@ function AlbumPageTitle(model, conf){
     }
 
     function updateDetailValues(){
-        var picture = model.pictures[model.selectedPictureIndex]
+        var picture = model.pictures[model.selectedPictureIndex];
         if (!picture) return;
         $detailsView.find(".file-name").html(picture.filename);
         $detailsView.find(".file-date").html(picture.date);
@@ -836,8 +836,8 @@ function AlbumPageTitle(model, conf){
 }
 ;function AlbumModel(albumDelegate){
 
-    var delegate = albumDelegate
-    var self = this
+    var delegate = albumDelegate;
+    var self = this;
 
     this.path = null;
     this.albuns = null;
@@ -851,11 +851,9 @@ function AlbumPageTitle(model, conf){
     this.detailsOn = false;
 
     this.loadAlbum = function(albumPath){
-        albumPath = albumPath.replace(Settings.URL_PREFIX, '')
-        console.log("loading: "+albumPath);
-        self.loading = true
+        self.loading = true;
         delegate.get(albumPath, loadAlbumResultHandler, loadAlbumFailHandler);
-    }
+    };
 
     function loadAlbumResultHandler(result){
         for (var prop in result){
@@ -863,160 +861,187 @@ function AlbumPageTitle(model, conf){
                 self[prop] = result[prop];
             }
         }
-        console.log(self)
-        self.loading = false
+        self.loading = false;
         self.selectedPictureIndex = null;
     }
 
     function loadAlbumFailHandler(error){
-        self.loading = false
-        alert("Album does not exist")
+        self.loading = false;
+        alert("Album does not exist");
     }
 
     return this;
 }
 
-function AlbumDelegate(){
+function AlbumAjaxDelegate(){
 
     this.get = function(albumPath, resultHandler, failHandler){
-        var url = Settings.URL_DATA_PREFIX + albumPath;
+        var url = albumPath.replace(Settings.URL_PREFIX, '');
+        url = Settings.URL_DATA_PREFIX + url;
         url = StringUtil.sanitizeUrl(url);
-        console.log("URL: "+url)
         $.get(url, function(result) {
-            resultHandler(result)
+            resultHandler(result);
         }).fail(function(status){
-            failHandler(status)
+            failHandler(status);
         });
-    }
+    };
+}
+
+function AlbumHtmlDelegate(imgs){
+    this.get = function(albumPath, resultHandler, failHandler){
+        if (imgs.length === 0){
+            return failHandler();
+        }
+        var result = {
+                path: albumPath,
+                pictures: []
+        };
+        imgs.each(function(i, element){
+            $el = $(element);
+            var ratio = parseFloat($el.attr("width")) / parseFloat($el.attr("height"));
+            ratio = Math.round(ratio * 1000) / 1000;
+            var picture = {
+                    width: $el.attr("width"),
+                    height: $el.attr("height"),
+                    thumb: $el.attr("src"),
+                    url: $el.data("photo"),
+                    highlight: $el.data("photo"),
+                    ratio: ratio
+            };
+            result.pictures.push(picture);
+        });
+        resultHandler(result);
+    };
 };function Resize(pictures, heightProportion){
     this.pictures = pictures;
     this.HEIGHT_PROPORTION = 0.45;
     if (heightProportion){
-        this.HEIGHT_PROPORTION = heightProportion
+        this.HEIGHT_PROPORTION = heightProportion;
     }
 }
 
 Resize.prototype.doResize = function(viewWidth, viewHeight){
-    var idealHeight = parseInt(viewHeight * this.HEIGHT_PROPORTION)
+    var idealHeight = parseInt(viewHeight * this.HEIGHT_PROPORTION);
 
-    var sumWidths = this.sumWidth(idealHeight)
-    var rows = Math.ceil(sumWidths / viewWidth)
+    var sumWidths = this.sumWidth(idealHeight);
+    var rows = Math.ceil(sumWidths / viewWidth);
 
 //    if (rows <= 1){
 //        // fallback to standard size
 //        console.log("1 row")
 //        this.resizeToSameHeight(idealHeight)
 //    } else {
-      return this.resizeUsingLinearPartitions(rows, viewWidth)
+      return this.resizeUsingLinearPartitions(rows, viewWidth);
 //    }
-}
+};
 
 Resize.prototype.sumWidth = function(height){
     var sumWidths = 0;
-    var p
-    for (var i in this.pictures){
-        p = this.pictures[i]
-        sumWidths += p.ratio * height
-    }
-    return sumWidths;
-}
-
-Resize.prototype.resizeToSameHeight = function(height){
-    var p
-    for (var i in this.pictures){
-        p = this.pictures[i]
-        p.newWidth = parseInt(height * p.ratio)
-        p.newHeight = height
-    }
-    return this.pictures
-}
-
-Resize.prototype.resizeUsingLinearPartitions = function(rows, viewWidth){
-    var weights = []
     var p;
     for (var i in this.pictures){
-        p = this.pictures[i]
-        weights.push(parseInt(p.ratio * 100))
+        p = this.pictures[i];
+        sumWidths += p.ratio * height;
     }
-    var partitions = linearPartition(weights, rows)
+    return sumWidths;
+};
+
+Resize.prototype.resizeToSameHeight = function(height){
+    var p;
+    for (var i in this.pictures){
+        p = this.pictures[i];
+        p.newWidth = parseInt(height * p.ratio);
+        p.newHeight = height;
+    }
+    return this.pictures;
+};
+
+Resize.prototype.resizeUsingLinearPartitions = function(rows, viewWidth){
+    var weights = [];
+    var p, i, j;
+    for (i in this.pictures){
+        p = this.pictures[i];
+        weights.push(parseInt(p.ratio * 100));
+    }
+    var partitions = linearPartition(weights, rows);
     var index = 0;
-    var newDimensions = []
-    for(var i in partitions){
-        partition = partitions[i]
-        var rowList = []
+    var newDimensions = [];
+    for(i in partitions){
+        partition = partitions[i];
+        var rowList = [];
         for(j in partition){
-            rowList.push(this.pictures[index])
-            index++
+            rowList.push(this.pictures[index]);
+            index++;
         }
         var summedRatios = 0;
         for (j in rowList){
-            p = rowList[j]
-            summedRatios += p.ratio
+            p = rowList[j];
+            summedRatios += p.ratio;
         }
         for (j in rowList){
-            p = rowList[j]
-            var dimension = {}
-            dimension.newWidth = parseInt((viewWidth / summedRatios) * p.ratio)
-            dimension.newHeight = parseInt(viewWidth / summedRatios)
-            newDimensions.push(dimension)
+            p = rowList[j];
+            var dimension = {};
+            dimension.newWidth = parseInt((viewWidth / summedRatios) * p.ratio);
+            dimension.newHeight = parseInt(viewWidth / summedRatios);
+            newDimensions.push(dimension);
         }
     }
     return newDimensions;
-}
+};
 
 function linearPartition(seq, k){
     if (k <= 0){
-        return []
+        return [];
     }
 
     var n = seq.length - 1;
-    var partitions = []
+    var partitions = [];
     if (k > n){
-        for (i in seq){
-            partitions.push([seq[i]])
+        for (var i in seq){
+            partitions.push([seq[i]]);
         }
         return partitions;
     }
-    var solution = linearPartitionTable(seq, k)
+    var solution = linearPartitionTable(seq, k);
     k = k - 2;
-    var ans = []
+    var ans = [];
     while (k >= 0){
-        var partial = seq.slice(solution[n-1][k]+1, n+1)
-        ans = [partial].concat(ans)
-        n = solution[n-1][k]
+        var partial = seq.slice(solution[n-1][k]+1, n+1);
+        ans = [partial].concat(ans);
+        n = solution[n-1][k];
         k = k - 1;
     }
-    ans = [seq.slice(0, n+1)].concat(ans)
-    return ans
+    ans = [seq.slice(0, n+1)].concat(ans);
+    return ans;
 }
 
 function linearPartitionTable(seq, k){
-    var n = seq.length
-    var table = []
-    var row = []
-    for (var i=0; i<k; i++) row.push(0)
-    for (var i=0; i<n; i++) table.push( row.slice() )
+    var n = seq.length;
+    var table = [];
+    var row = [];
+    var i, j, x;
+    for (i=0; i<k; i++) row.push(0);
+    for (i=0; i<n; i++) table.push( row.slice() );
 
-    var solution = []
-    row = []
-    for (var i=0; i<(k-1); i++) row.push(0)
-    for (var i=0; i<(n-1); i++) solution.push( row.slice() )
+    var solution = [];
+    row = [];
+    for (i=0; i<(k-1); i++) row.push(0);
+    for (i=0; i<(n-1); i++) solution.push( row.slice() );
 
-    for (var i=0; i<n; i++){
-        var value = seq[i]
+    for (i=0; i<n; i++){
+        var value = seq[i];
         if (i>0){
-            value += table[i-1][0]
+            value += table[i-1][0];
         }
-        table[i][0] = value
+        table[i][0] = value;
     }
-    for (var j=0; j<k; j++){
-        table[0][j] = seq[0]
+    for (j=0; j<k; j++){
+        table[0][j] = seq[0];
     }
-    for (var i=1; i<n; i++){
-        for (var j=1; j<k; j++){
-            var min = null
-            var minx = null
-            for (var x = 0; x < i; x++) {
+    for (i=1; i<n; i++){
+        for (j=1; j<k; j++){
+            var min = null;
+            var minx = null;
+            for (x = 0; x < i; x++) {
                 var cost = Math.max(table[x][j - 1], table[i][0] - table[x][0]);
                 if (min === null || cost < min) {
                     min = cost;
@@ -1027,5 +1052,5 @@ function linearPartitionTable(seq, k){
             solution[i - 1][j - 1] = minx;
         }
     }
-    return solution
+    return solution;
 }
