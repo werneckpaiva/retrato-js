@@ -8,15 +8,37 @@
 <script type="text/javascript" src="js/mustache.js.js"></script>
 <script type="text/javascript" src="js/retrato-js.js"></script>
 <script type="text/javascript" src="js/watch.js"></script>
+<style>
+    body{
+        background: #eee;
+    }
+    #album{
+        background: #fff;
+        width: 70%;
+        border: 1px solid #ddd;
+        padding: 10px;
+        margin-left: auto;
+        margin-right: auto;
+        font-size: 0;
+    }
 
-<script type="text/javascript" src="../src/model.js"></script>
-<script type="text/javascript" src="../src/resize.js"></script>
-<script type="text/javascript" src="../src/album.js"></script>
-<script type="text/javascript" src="../src/highlight.js"></script>
+    #album img{
+        margin: 2px;
+        padding: 0;
+        display: inline-block;
+    }
+
+</style>
 <script type="text/javascript">
     $(function(){
         var delegate = new AlbumHtmlDelegate($("#album img"));
         var model = new AlbumModel(delegate);
+        var albumPhotos = new AlbumPhotos(model, {
+            view: $("#album"), 
+            template: '<img src="{{src}}" width="{{width}}" height="{{height}}"/>',
+            heightProportion: 0.2,
+            margin: 4
+        });
         watch(model, "pictures", function(){
             console.log(model.pictures);
         });
