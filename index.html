@@ -12,6 +12,9 @@
     body{
         background: #eee;
     }
+    #content{
+        
+    }
     #album{
         background: #fff;
         width: 70%;
@@ -41,7 +44,7 @@
             view: $("#album"), 
             template: '<img src="{{src}}" width="{{width}}" height="{{height}}"/>',
             heightProportion: 0.2,
-            margin: 4
+            margin: 5
         });
         watch(model, "pictures", function(){
             console.log(model.pictures);
@@ -52,6 +55,7 @@
 </head>
 <body>
 <div id="content">
+    <a href="https://travis-ci.org/werneckpaiva/retrato-js" target="_blank"><img src="https://travis-ci.org/werneckpaiva/retrato-js.svg?branch=master"></a>
     <div id="album">
         <img src="photos/banchory_01_thumb.jpg" width="640" height="426" data-photo="photos/banchory_01.jpg"/>
         <img src="photos/banchory_02_thumb.jpg" width="640" height="426" data-photo="photos/banchory_02.jpg"/>
@@ -65,7 +69,6 @@
         <img src="photos/edinburgh_03_thumb.jpg" width="640" height="426" data-photo="photos/edinburgh_03.jpg"/>
         <img src="photos/edinburgh_04_thumb.jpg" width="640" height="426" data-photo="photos/edinburgh_04.jpg"/>
     </div>
-    <a href="https://travis-ci.org/werneckpaiva/retrato-js"><img src="https://travis-ci.org/werneckpaiva/retrato-js.svg?branch=master"></a>
 </div>
 </body>
 </html>
