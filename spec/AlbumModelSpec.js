@@ -1,6 +1,6 @@
-describe("AlbumHtmlDelegate", function() {
+describe("Creates model from images", function() {
 
-    it("single picture", function(done) {
+    it("should handle a single picture", function(done) {
         var imgs = $("<img src='img1_thumb.jpg' width='640' height='480' data-photo='img1.jpg' />");
         var albumHtmlDelegate = new AlbumHtmlDelegate(imgs);
         albumHtmlDelegate.get('/', function(result){
@@ -22,7 +22,7 @@ describe("AlbumHtmlDelegate", function() {
         function(){ });
     }); 
 
-    it("multiple pictures", function(done) {
+    it("should handle multiple pictures", function(done) {
         var content = "<img src='img1_thumb.jpg' width='640' height='480' data-photo='img1.jpg' />";
         content += "<img src='img2_thumb.jpg' width='640' height='480' data-photo='img2.jpg' />";
         content += "<img src='img3_thumb.jpg' width='640' height='480' data-photo='img3.jpg' />";
@@ -39,7 +39,7 @@ describe("AlbumHtmlDelegate", function() {
         }, function(){ });
     }); 
 
-    it("fails without pictures", function(done) {
+    it("should fail without pictures", function(done) {
 
         var imgs = $("");
         var albumHtmlDelegate = new AlbumHtmlDelegate(imgs);
@@ -53,9 +53,9 @@ describe("AlbumHtmlDelegate", function() {
 });
 
 
-describe("AlbumModelWithHtmlDelegate", function() {
+describe("Updates data model from image tags", function() {
 
-    it("single picture", function(done) {
+    it("should fire model change with a single image", function(done) {
         var imgs = $("<img src='img1_thumb.jpg' width='640' height='426' data-photo='img1.jpg' />");
         var delegate = new AlbumHtmlDelegate(imgs);
         var model = new AlbumModel(delegate);

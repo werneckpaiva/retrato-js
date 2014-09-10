@@ -56,141 +56,6 @@ var Fullscreen = {
     }
 };
 
-function Loading(model, conf){
-
-    var $view = null;
-
-    function init(){
-        $view = conf.view;
-        watch(model, "loading", function(){
-            $view.toggle(model.loading);
-        });
-        $view.hide();
-    }
-
-    init();
-}
-
-function AlbumNavigator(model, conf){
-
-    var template = null;
-    var $view = null;
-    var $viewList = null;
-    
-    var animate = true;
-
-    function init(){
-        $view = conf.view;
-        template = conf.template;
-        $viewList = (conf.listClass)? $view.find("."+conf.listClass) : $view;
-        animate = (conf.listClass)? conf.listClass : true;
-
-        watch(model, "albuns", function(){
-            displayAlbuns();
-        });
-        
-    }
-
-    function getAlbumUrl(albumName){
-        var url = Settings.URL_PREFIX + model.path + '/' + albumName;
-        url = StringUtil.sanitizeUrl(url);
-        return url;
-    }
-    
-    function displayAlbuns(){
-        if(!model.albuns || model.albuns.length === 0){
-            $view.removeClass("visible");
-            return;
-        }
-        $view.addClass("visible");
-        content = "";
-        for (var i=0; i<model.albuns.length; i++){
-            var albumName = model.albuns[i];
-            content += Mustache.render(template, {
-                url: getAlbumUrl(albumName), 
-                name: StringUtil.humanizeName(albumName)});
-        }
-        $viewList.html(content);
-        enableAsynchronous();
-    }
-
-    function enableAsynchronous(){
-        $view.find("a").click(function(event){
-            event.preventDefault();
-            $('html,body').animate({scrollTop:0}, 500);
-            model.loadAlbum($(this).attr("href"));
-        });
-    }
-
-    init();
-}
-
-function AlbumBreadcrumb(model, conf){
-
-    var self = this;
-
-    var $view = null;
-    var $viewList = null;
-    var templateHome = null;
-    var template = null;
-
-    function init(){
-        $view = conf.view;
-        $viewList = (conf.listClass)? $view.find("."+conf.listClass) : $view;
-        templateHome = conf.templateHome;
-        template = conf.template;
-        
-        watch(model, "path", function(){
-            self.updatePath();
-        });
-
-        watch(model, "selectedPictureIndex", function(){
-            self.updatePath();
-        });
-    }
-
-    function getAlbumUrl(albumName){
-        var url = Settings.URL_PREFIX + model.path + '/' + albumName;
-        url = StringUtil.sanitizeUrl(url);
-        return url;
-    }
-
-    this.updatePath = function(){
-        var parts = model.path.split("/");
-        if (parts[parts.length - 1]===""){
-            parts.pop();
-        }
-        if (model.selectedPictureIndex !== null){
-            var p = model.pictures[model.selectedPictureIndex];
-            parts.push(p.filename);
-        }
-        var partial = '/';
-        var content = Mustache.render(templateHome, {
-            url: StringUtil.sanitizeUrl(Settings.URL_PREFIX + '/')
-        });
-        for (var i=1; i<parts.length; i++){
-            partial += parts[i] + '/';
-            params = {};
-            if (i < parts.length - 1){
-                params.url = StringUtil.sanitizeUrl(Settings.URL_PREFIX + partial);
-            }
-            params.name = StringUtil.humanizeName(parts[i]);
-            content += Mustache.render(template, params);
-        }
-        $viewList.html(content);
-        enableAsynchronous();
-    };
-
-    function enableAsynchronous(){
-        $viewList.find("a").click(function(){
-            model.loadAlbum($(this).attr("href"));
-            return false;
-        });
-    }
-
-    init();
-}
-
 
 function AlbumMenu(model, conf){
 
@@ -271,52 +136,6 @@ function AlbumMenu(model, conf){
 }
 
 
-function AlbumDeepLinking(model){
-
-    var self = this;
-
-    function init(){
-        watch(model, "path", function(){
-            updateUrl();
-        });
-
-        $(window).bind('popstate', function(event){
-            changeAlbumFromUrl();
-        });
-
-        changeAlbumFromUrl();
-    }
-
-    function extractPathFromUrl(){
-        var albumPath = location.pathname;
-        albumPath = albumPath.replace(Settings.URL_PREFIX, "");
-        if (!albumPath){
-            albumPath = "/";
-        }
-        return albumPath;
-    }
-
-    function updateUrl(){
-        var currentAlbumPath = location.pathname;
-        var newPath = Settings.URL_PREFIX + model.path;
-        if (currentAlbumPath == newPath){
-            return;
-        }
-        newPath = StringUtil.sanitizeUrl(newPath);
-        history.pushState(null, null, newPath);
-    }
-
-    function changeAlbumFromUrl(){
-        var albumPath = extractPathFromUrl();
-        if (albumPath == model.path){
-            return;
-        }
-        model.loadAlbum(albumPath);
-    }
-
-    init();
-}
-
 function AlbumPhotos(model, conf){
 
     var self = this;
@@ -324,17 +143,13 @@ function AlbumPhotos(model, conf){
     var $viewList = null;
     var template = null;
     var currentWidth = 0;
-    var heightProportion = 0.45;
+    var heightProportion = null;
+    var lazyLoad = false;
 
-    var margin = 2;
+    var margin = 0;
 
     function init(){
-        $view = conf.view;
-        $viewList = (conf.listClass)? $view.find("."+conf.listClass) : $view;
-        template = conf.template;
-        if (conf.heightProportion){
-            heightProportion = conf.heightProportion;
-        }
+        setConfiguration();
 
         watch(model, "pictures", function(prop, action, newvalue, oldvalue){
             var picturesChanged = Array.isArray(newvalue);
@@ -346,19 +161,17 @@ function AlbumPhotos(model, conf){
         });
     }
 
-//    this.picturesChanged = function(){
-//        var imgs = $viewList.find("img")
-//        if (imgs.length == 0 || model.pictures.length == 0){
-//            return true;
-//        }
-//        var changed = false
-//        for (var i=0; i<imgs.length; i++){
-//            if (model.pictures[i] && imgs[i].src.indexOf(model.pictures[i].thumb) == -1){
-//                changed = true
-//            }
-//        }
-//        return changed;
-//    }
+    function setConfiguration(){
+        // Required
+        $view = conf.view;
+        template = conf.template;
+
+        // Optional
+        $viewList = (conf.listClass)? $view.find("."+conf.listClass) : $view;
+        heightProportion = (conf.heightProportion)? conf.heightProportion : 0.45;
+        lazyLoad = (conf.lazyLoad)? conf.lazyLoad : false;
+        margin = (conf.margin)?  conf.margin : 0;
+    }
     
     this.displayPictures = function(picturesChanged){
         if (picturesChanged===false){
@@ -374,18 +187,17 @@ function AlbumPhotos(model, conf){
 
         var resize = new Resize(model.pictures, heightProportion);
         currentWidth = $view.width();
-        console.log("currentWidth: "+currentWidth);
         var newPictures = resize.doResize(currentWidth, $(window).height());
 
-        content = "";
+        var content = "";
         for (var i=0; i<newPictures.length; i++){
             var p = newPictures[i];
             var params = {
                     width: p.newWidth-margin,
                     height: p.newHeight-margin
             };
-            if (!conf.lazyLoad){
-                params.src = p.thumb;
+            if (!lazyLoad){
+                params.src = model.pictures[i].thumb;
             }
             content += Mustache.render(template, params);
         }
@@ -393,8 +205,8 @@ function AlbumPhotos(model, conf){
         $viewList.find("img").click(function(){
             model.selectedPictureIndex = $(this).data("index");
         });
-        if (conf.lazyLoad){
-            lazyLoad();
+        if (lazyLoad){
+            startLazyLoading();
         }
     };
 
@@ -413,7 +225,7 @@ function AlbumPhotos(model, conf){
         });
     };
 
-    function lazyLoad(){
+    function startLazyLoading(){
 
         function loadNextPicture(){
             if (index >= model.pictures.length){
@@ -441,45 +253,5 @@ function AlbumPhotos(model, conf){
         loadNextPicture();
     }
 
-    init();
-}
-
-function AlbumPageTitle(model, conf){
-
-    var template = 'Album {{title}}';
-    var templateEmpty = '';
-    var separator = ' | ';
-
-    function init(){
-        if (conf && conf.template) {
-            template = conf.template;
-        }
-        if (conf && conf.templateEmpty) {
-            templateEmpty = conf.templateEmpty;
-        } else {
-            templateEmpty = template;
-        }
-        watch(model, "path", function(){
-            self.updateTitle();
-        });
-        watch(model, "selectedPictureIndex", function(){
-            self.updateTitle();
-        });
-    }
-
-    this.updateTitle = function(){
-        var path = model.path;
-        path = path.replace(/^\//, '');
-        path = path.replace(/\/$/, '');
-        path = path.replace(/[\/]+/g,  separator);
-        var newTitle = '';
-        if (path){
-            newTitle = Mustache.render(template, {title: path});
-        } else {
-            newTitle = Mustache.render(templateEmpty);
-        }
-        document.title = newTitle;
-    };
-    
     init();
 }
