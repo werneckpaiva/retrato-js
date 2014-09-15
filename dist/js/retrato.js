@@ -749,11 +749,14 @@ Resize.prototype.resizeUsingLinearPartitions = function(rows, viewWidth){
             p = rowList[j];
             summedRatios += p.ratio;
         }
+        var rowHeight = (viewWidth / summedRatios);
+        var rowWidth = 0;
         for (j in rowList){
             p = rowList[j];
             var dimension = {};
-            dimension.newWidth = parseInt((viewWidth / summedRatios) * p.ratio);
-            dimension.newHeight = parseInt(viewWidth / summedRatios);
+            dimension.newWidth = parseInt(rowHeight * p.ratio);
+            rowWidth += dimension.newWidth;
+            dimension.newHeight = parseInt(rowHeight);
             newDimensions.push(dimension);
         }
     }
