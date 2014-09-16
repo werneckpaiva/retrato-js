@@ -114,7 +114,7 @@
     }
     #album1 img{
         margin: 0;
-        padding: 2px;
+        padding: 1px;
         display: inline-block;
     }
 
@@ -135,14 +135,14 @@
 </style>
 <script type="text/javascript">
     $(function(){
-        (new Headroom(document.getElementById("top-menu"))).init();
+        (new Headroom(document.getElementById("top-menu"), {offset: 30})).init();
 
         var model1 = new AlbumModel(new AlbumHtmlDelegate($("#album1 img")));
         var albumPhotos = new AlbumPhotos(model1, {
             view: $("#album1"), 
             template: '<img src="{{src}}" width="{{width}}" height="{{height}}"/>',
             heightProportion: 0.25,
-            margin: 4
+            margin: 2
         });
         model1.loadAlbum('/');
         
