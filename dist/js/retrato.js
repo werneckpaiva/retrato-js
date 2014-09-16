@@ -693,6 +693,7 @@ function AlbumHtmlDelegate(imgs){
 }
 
 Resize.prototype.doResize = function(viewWidth, viewHeight){
+    viewWidth--;
     var idealHeight = parseInt(viewHeight * this.HEIGHT_PROPORTION);
 
     var sumWidths = this.sumWidth(idealHeight);
