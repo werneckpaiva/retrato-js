@@ -11,7 +11,7 @@ describe("Resize pictures", function() {
 
         for (var i in pictures){
             expect(pictures[i].newHeight).toBe(412);
-            expect(pictures[i].newWidth).toBe(549);
+            expect(pictures[i].newWidth).toBe(550);
         }
     });
 
@@ -24,7 +24,7 @@ describe("Resize pictures", function() {
 
         for (var i in pictures){
             expect(pictures[i].newHeight).toBe(412);
-            expect(pictures[i].newWidth).toBe(549);
+            expect(pictures[i].newWidth).toBe(550);
         }
     });
 

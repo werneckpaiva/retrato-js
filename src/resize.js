@@ -7,7 +7,8 @@ function Resize(pictures, heightProportion){
 }
 
 Resize.prototype.doResize = function(viewWidth, viewHeight){
-    viewWidth--;
+    viewWidth = Math.floor(viewWidth);
+//    viewWidth--;
     var idealHeight = parseInt(viewHeight * this.HEIGHT_PROPORTION);
 
     var sumWidths = this.sumWidth(idealHeight);
