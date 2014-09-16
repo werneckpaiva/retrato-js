@@ -8,70 +8,190 @@
 <script type="text/javascript" src="js/mustache.js.js"></script>
 <script type="text/javascript" src="js/retrato-js.js"></script>
 <script type="text/javascript" src="js/watch.js"></script>
+<script type="text/javascript" src="js/headroom.js"></script>
 <style>
     body{
-        background: #eee;
-    }
-    #content{
-        
-    }
-    #album{
-        background: #fff;
-        width: 70%;
-        border: 1px solid #ddd;
-        padding: 10px;
-        margin-left: auto;
-        margin-right: auto;
-        font-size: 0;
+        background: #333;
+        padding:0px;
+        margin: 0;
+        font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, sans-serif;
+        overflow-y: scroll;
     }
 
-    #album img{
-        margin: 0px;
+    #top-menu{
+        background: #000;
+        font-size: 1em;
+        color:#fff;
+        z-index: 1;
+        width:100%;
+        height:45px;
+        position: fixed;
+        top: 0;
+        -webkit-box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
+        -moz-box-shadow:    0px 2px 5px 0px rgba(0, 0, 0, 0.3);
+        box-shadow:         0px 2px 5px 0px rgba(0, 0, 0, 0.3);
+
+        -webkit-transition: all .25s ease-in-out;
+        -moz-transition: all .25s ease-in-out;
+        -o-transition: all .25s ease-in-out;
+        transition: all .25s ease-in-out;
+
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    #top-menu.headroom--top {
+        transition: transform 200ms linear;
+    }
+
+    #top-menu.headroom--pinned {
+        -webkit-transform: translateY(0);
+        -ms-transform: translateY(0);
+        transform: translateY(0);
+    }
+
+    #top-menu.headroom--unpinned {
+        -webkit-transform: translateY(-110%);
+        -ms-transform: translateY(-110%);
+        transform: translateY(-110%);
+    }
+
+    #top-menu .menu-container{
+        margin: 0 10px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: flex-end;
+        align-items: center;
+        align-items: center;
+    }
+
+    #status{
+        margin: 0 5%;
+    }
+
+    #main-menu{
+        margin: 0 5%;
+    }
+
+    #main-menu ul{
+        padding: 0;
+        margin: 0 5px;
+    }
+
+    #main-menu li{
+        padding: 0px;
+        margin: 0;
+        display: block;
+        float: left;
+    }
+
+    #main-menu li:after{ 
+        content: "|";
+        margin: 0 10px;
+    }
+
+    #main-menu li:last-child:after{
+        content: "";
+    }
+
+    #main-menu li a{
+        color: #fff;
+        text-decoration: none;
+    }
+
+    #main-menu li a:hover{
+        text-decoration: underline;
+    }
+
+    #album1{
+        background: #fff;
+        padding: 0px;
+        margin: 40px 0 0 0;
+        font-size: 0;
+    }
+    #album1 img{
+        margin: 0;
         padding: 2px;
         display: inline-block;
+    }
+
+    #code-album1{
+        margin: 20px 5%;
     }
 
     a img {
         boder: none;
     }
 
+    h2{
+        font-size: 2em;
+        margin: 20px 5% 0 5%;
+        color: #fff;
+    }
+
 </style>
 <script type="text/javascript">
     $(function(){
-        var delegate = new AlbumHtmlDelegate($("#album img"));
-        var model = new AlbumModel(delegate);
-        var albumPhotos = new AlbumPhotos(model, {
-            view: $("#album"), 
+        (new Headroom(document.getElementById("top-menu"))).init();
+
+        var model1 = new AlbumModel(new AlbumHtmlDelegate($("#album1 img")));
+        var albumPhotos = new AlbumPhotos(model1, {
+            view: $("#album1"), 
             template: '<img src="{{src}}" width="{{width}}" height="{{height}}"/>',
-            heightProportion: 0.2,
+            heightProportion: 0.25,
             margin: 4
         });
+        model1.loadAlbum('/');
         
-/*         var highlight = new Highlight(model, {
-            view: $("#highlight"),
-            template: '<div class="photo-frame"><canvas class="box-blur"/><div class="large-photo"><img class="low-res" /><img class="high-res"/></div></div>'
-        }) */
-        
-        model.loadAlbum('/');
     });
 </script>
 </head>
 <body>
 <div id="content">
-    <a href="https://travis-ci.org/werneckpaiva/retrato-js" target="_blank"><img src="https://travis-ci.org/werneckpaiva/retrato-js.svg?branch=master"></a>
-    <div id="highlight"></div>
-    <div id="album">
+    <header id="top-menu" class="slide">
+            <nav id="main-menu">
+                <ul>
+                    <li><a href="#getting-started">Getting started</a></li>
+                    <li><a href="#customizing">Installing</a></li>
+                    <li><a href="#customizing">Customizing</a></li>
+                    <li><a href="#getting-started">Contributing</a></li>
+                </ul>
+            </nav>
+            <div id="status">
+                <a href="https://travis-ci.org/werneckpaiva/retrato-js" target="_blank"><img src="https://travis-ci.org/werneckpaiva/retrato-js.svg?branch=master"></a>
+            </div>
+    </header>
+    <div id="album1">
         <img src="photos/banchory_01_thumb.jpg" width="640" height="426" data-photo="photos/banchory_01.jpg"/>
+        <img src="photos/banchory_04_thumb.jpg" width="426" height="640" data-photo="photos/banchory_04.jpg"/>
         <img src="photos/banchory_02_thumb.jpg" width="640" height="426" data-photo="photos/banchory_02.jpg"/>
         <img src="photos/banchory_03_thumb.jpg" width="426" height="640" data-photo="photos/banchory_03.jpg"/>
-        <img src="photos/banchory_04_thumb.jpg" width="426" height="640" data-photo="photos/banchory_04.jpg"/>
         <img src="photos/banchory_05_thumb.jpg" width="640" height="426" data-photo="photos/banchory_05.jpg"/>
-        <img src="photos/banchory_06_thumb.jpg" width="640" height="426" data-photo="photos/banchory_06.jpg"/>
         <img src="photos/banchory_07_thumb.jpg" width="640" height="426" data-photo="photos/banchory_07.jpg"/>
         <img src="photos/edinburgh_01_thumb.jpg" width="426" height="640" data-photo="photos/edinburgh_01.jpg"/>
         <img src="photos/edinburgh_02_thumb.jpg" width="640" height="426" data-photo="photos/edinburgh_02.jpg"/>
         <img src="photos/edinburgh_03_thumb.jpg" width="640" height="426" data-photo="photos/edinburgh_03.jpg"/>
         <img src="photos/edinburgh_04_thumb.jpg" width="640" height="426" data-photo="photos/edinburgh_04.jpg"/>
+    </div>
+    <h2><a id="getting-started">Getting started</a></h2>
+    <div id="code-album1">
+        <div data-height="268" data-theme-id="8536" data-slug-hash="Grpyx" data-default-tab="js" data-user="werneckpaiva" class='codepen'>
+            <pre><code>
+var model1 = new AlbumModel(new AlbumHtmlDelegate($(&quot;#album1 img&quot;)));
+var albumPhotos = new AlbumPhotos(model1, {
+        view: $(&quot;#album1&quot;),
+        template: &#39;&lt;img src=&quot;{{src}}&quot; width=&quot;{{width}}&quot; height=&quot;{{height}}&quot;/&gt;&#39;,
+        heightProportion: 0.25,
+        margin: 4
+});
+model1.loadAlbum(&#39;/&#39;);
+            </code></pre>
+            <p>See the Pen <a href='http://codepen.io/werneckpaiva/pen/Grpyx/'>Grpyx</a> by Ricardo (<a href='http://codepen.io/werneckpaiva'>@werneckpaiva</a>) on <a href='http://codepen.io'>CodePen</a>.</p>
+        </div>
+        <script async src="//codepen.io/assets/embed/ei.js"></script>
     </div>
 </div>
 </body>

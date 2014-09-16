@@ -10,7 +10,12 @@ module.exports = function(grunt) {
             dev : {
                 dest : '<%= config.destination %>',
                 options : {
-                    stripAffix : false
+                    stripAffix : false,
+                    packageSpecific : {
+                        'headroom.js' : {
+                            files : [ "dist/headroom.js" ]
+                        }
+                    }
                 }
             }
         },
