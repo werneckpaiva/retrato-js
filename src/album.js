@@ -202,9 +202,13 @@ function AlbumPhotos(model, conf){
             content += Mustache.render(template, params);
         }
         $viewList.html(content);
-        $viewList.find("img").click(function(){
-            model.selectedPictureIndex = $(this).data("index");
-        });
+        $viewList.find("img")
+            .each(function(i, el){
+                $(el).data("index", i);
+            })
+            .click(function(){
+                model.selectedPictureIndex = $(this).data("index");
+            });
         if (lazyLoad){
             startLazyLoading();
         }
@@ -231,7 +235,6 @@ function AlbumPhotos(model, conf){
             if (index >= model.pictures.length){
                 return;
             }
-            $viewList.find("img:eq("+index+")").data("index", index);
             if (image.src == model.pictures[index].thumb){
                 index++;
                 loadNextPicture();

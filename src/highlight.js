@@ -14,13 +14,16 @@ function Highlight(model, conf){
     var isOpened = false;
 
     var padding = 15;
-    var headerHeight = 45;
-    
+    var headerHeight = 0;
+
+    var boxBlurClass = null;
+
     function init(){
         $view = conf.view;
         $viewList = (conf.listClass)? $view.find("."+conf.listClass) : $view;
         template = conf.template;
-        $detailsView = conf.detailsView;
+        $detailsView = (conf.detailsView)? conf.detailsView : [];
+        boxBlurClass =  (conf.boxBlurClass)? "." + conf.boxBlurClass : '.box-blur';
 
         watch(model, "selectedPictureIndex", function(){
             onPictureSelected();
@@ -124,7 +127,7 @@ function Highlight(model, conf){
         newCurrentFrame.removeClass("prev-frame").addClass("current-frame");
         var newCurrentPicture = model.pictures[model.selectedPictureIndex];
         var newCurrentDimension = calculateDimension(newCurrentPicture);
-        newCurrentFrame.find(".box-blur").hide();
+        newCurrentFrame.find(boxBlurClass).hide();
         newCurrentFrame.find(".large-photo").animate({
             left: newCurrentDimension.x
         }, 500, "swing", function(){
@@ -167,7 +170,7 @@ function Highlight(model, conf){
         newCurrentFrame.removeClass("next-frame").addClass("current-frame");
         var newCurrentPicture = model.pictures[model.selectedPictureIndex];
         var newCurrentDimension = calculateDimension(newCurrentPicture);
-        newCurrentFrame.find(".box-blur").hide();
+        newCurrentFrame.find(boxBlurClass).hide();
         newCurrentFrame.find(".large-photo").animate({
             left: newCurrentDimension.x
         }, 500, "swing", function(){
@@ -223,12 +226,12 @@ function Highlight(model, conf){
         $view.fadeIn("slow");
         var picture, dimension;
         if (currentFrame) {
-            picture = model.pictures[model.selectedPictureIndex].
+            picture = model.pictures[model.selectedPictureIndex];
             dimension = calculateDimension(picture);
             setPosition(currentFrame, dimension);
             showLowResolution(currentFrame, picture);
             showHighResolution(currentFrame, picture);
-            if (!currentFrame.find('.box-blur').is(':visible')){
+            if (!currentFrame.find(boxBlurClass).is(':visible')){
                 showBlur(currentFrame, picture);
             }
         }
@@ -316,7 +319,7 @@ function Highlight(model, conf){
 
     function showBlur(frame, picture){
         self.blurTimeout = setTimeout(function(){
-            var blur = frame.find('.box-blur').hide();
+            var blur = frame.find(boxBlurClass).hide();
             blur.fadeIn(2000);
             boxBlurImage(frame.find('.low-res').get(0), blur.get(0), 20, false, 2);
             blur.show();
