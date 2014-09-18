@@ -303,8 +303,8 @@ var shg_table = [0,9,10,10,14,12,14,14,16,15,16,15,16,15,15,17,18,17,12,18,16,17
 
 function boxBlurImage( img, canvas, radius, blurAlphaChannel, iterations){
 
-    var w = canvas.width
-    var h = canvas.height
+    var w = canvas.width;
+    var h = canvas.height;
 
     var context = canvas.getContext("2d");
     context.clearRect( 0, 0, canvas.width, canvas.height);
@@ -358,16 +358,12 @@ function boxBlurCanvasRGBA( canvas, top_x, top_y, width, height, radius, iterati
         try {
             netscape.security.PrivilegeManager.enablePrivilege("UniversalBrowserRead");
             imageData = context.getImageData( top_x, top_y, width, height );
-        } catch(e) {
-            alert("Cannot access local image");
-            throw new Error("unable to access local image data: " + e);
-            return;
+        } catch(error) {
+            throw new Error("unable to access local image data: " + error);
         }
       }
     } catch(e) {
-      alert("Cannot access image");
       throw new Error("unable to access image data: " + e);
-      return;
     }
             
     var pixels = imageData.data;
@@ -404,7 +400,7 @@ function boxBlurCanvasRGBA( canvas, top_x, top_y, width, height, radius, iterati
                 rsum += pixels[p++];
                 gsum += pixels[p++];
                 bsum += pixels[p++];
-                asum += pixels[p]
+                asum += pixels[p];
             }
             
             for ( x = 0; x < width; x++ ) {
@@ -413,7 +409,7 @@ function boxBlurCanvasRGBA( canvas, top_x, top_y, width, height, radius, iterati
                 b[yi] = bsum;
                 a[yi] = asum;
 
-                if( y==0) {
+                if(y===0) {
                     vmin[x] = ( ( p = x + rad1) < wm ? p : wm ) << 2;
                     vmax[x] = ( ( p = x - radius) > 0 ? p << 2 : 0 );
                 } 
@@ -459,7 +455,7 @@ function boxBlurCanvasRGBA( canvas, top_x, top_y, width, height, radius, iterati
                 } else {
                     pixels[yi] = pixels[yi+1] = pixels[yi+2] = 0;
                 }                
-                if( x == 0 ) {
+                if( x === 0 ) {
                     vmin[y] = ( ( p = y + rad1) < hm ? p : hm ) * width;
                     vmax[y] = ( ( p = y - radius) > 0 ? p * width : 0 );
                 } 
@@ -505,21 +501,17 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
         try {
             netscape.security.PrivilegeManager.enablePrivilege("UniversalBrowserRead");
             imageData = context.getImageData( top_x, top_y, width, height );
-        } catch(e) {
-            alert("Cannot access local image");
-            throw new Error("unable to access local image data: " + e);
-            return;
+        } catch(error) {
+            throw new Error("unable to access local image data: " + error);
         }
       }
-    } catch(e) {
-      alert("Cannot access image");
-      throw new Error("unable to access image data: " + e);
-      return;
+    } catch(error) {
+      throw new Error("unable to access image data: " + error);
     }
             
     var pixels = imageData.data;
         
-    var rsum,gsum,bsum,asum,x,y,i,p,p1,p2,yp,yi,yw,idx;        
+    var rsum,gsum,bsum,asum,x,y,i,p,p1,p2,yp,yi,yw,idx;
     var wm = width - 1;
       var hm = height - 1;
     var wh = width * height;
@@ -555,7 +547,7 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
                 g[yi] = gsum;
                 b[yi] = bsum;
                 
-                if( y==0) {
+                if(y===0) {
                     vmin[x] = ( ( p = x + rad1) < wm ? p : wm ) << 2;
                     vmax[x] = ( ( p = x - radius) > 0 ? p << 2 : 0 );
                 } 
@@ -591,7 +583,7 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
                 pixels[yi+1] = (gsum * mul_sum) >>> shg_sum;
                 pixels[yi+2] = (bsum * mul_sum) >>> shg_sum;
            
-                if( x == 0 ) {
+                if( x === 0 ) {
                     vmin[y] = ( ( p = y + rad1) < hm ? p : hm ) * width;
                     vmax[y] = ( ( p = y - radius) > 0 ? p * width : 0 );
                 } 
@@ -626,14 +618,15 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
     var padding = 15;
     var headerHeight = 0;
 
-    var boxBlurClass = null;
+    var blurContainer = null;
 
     function init(){
         $view = conf.view;
-        $viewList = (conf.listClass)? $view.find("."+conf.listClass) : $view;
+        $viewList = (conf.listClass)? $view.find("."+conf.listClass) : createFramesContainer();
         template = conf.template;
         $detailsView = (conf.detailsView)? conf.detailsView : [];
-        boxBlurClass =  (conf.boxBlurClass)? "." + conf.boxBlurClass : '.box-blur';
+
+        createBlurContainer();
 
         watch(model, "selectedPictureIndex", function(){
             onPictureSelected();
@@ -666,6 +659,18 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
         });
     }
 
+    function createFramesContainer(){
+        var $container = $("<div class='frame-container'></div>");
+        $view.append($container);
+        return $container
+    }
+    
+    function createBlurContainer(){
+        blurContainer = $('<div class="blur-container"></div>');
+        $view.append(blurContainer);
+        return blurContainer;
+    }
+    
     function onPictureSelected(){
         if (isOpened) {
             if (model.selectedPictureIndex === null){
@@ -675,6 +680,7 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
         }
         self.handleScroll();
         self.displayPicture();
+        blurContainer.empty();
     }
     
     function disableScroll(e){
@@ -711,6 +717,12 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
         return $frame;
     }
 
+    function createCanvas(){
+        var $canvas = $('<canvas class="blur"/>');
+        blurContainer.append($canvas);
+        return $canvas;
+    }
+
     this.displayPicture = function(){
         if (!self.hasPicturesToDisplay()){
             self.close();
@@ -737,7 +749,6 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
         newCurrentFrame.removeClass("prev-frame").addClass("current-frame");
         var newCurrentPicture = model.pictures[model.selectedPictureIndex];
         var newCurrentDimension = calculateDimension(newCurrentPicture);
-        newCurrentFrame.find(boxBlurClass).hide();
         newCurrentFrame.find(".large-photo").animate({
             left: newCurrentDimension.x
         }, 500, "swing", function(){
@@ -780,7 +791,6 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
         newCurrentFrame.removeClass("next-frame").addClass("current-frame");
         var newCurrentPicture = model.pictures[model.selectedPictureIndex];
         var newCurrentDimension = calculateDimension(newCurrentPicture);
-        newCurrentFrame.find(boxBlurClass).hide();
         newCurrentFrame.find(".large-photo").animate({
             left: newCurrentDimension.x
         }, 500, "swing", function(){
@@ -841,9 +851,7 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
             setPosition(currentFrame, dimension);
             showLowResolution(currentFrame, picture);
             showHighResolution(currentFrame, picture);
-            if (!currentFrame.find(boxBlurClass).is(':visible')){
-                showBlur(currentFrame, picture);
-            }
+            showBlur(currentFrame, picture);
         }
         if (prevFrame && model.selectedPictureIndex > 0) {
             picture = model.pictures[model.selectedPictureIndex - 1];
@@ -928,11 +936,14 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
     }
 
     function showBlur(frame, picture){
+        clearTimeout(self.blurTimeout);
         self.blurTimeout = setTimeout(function(){
-            var blur = frame.find(boxBlurClass).hide();
-            blur.fadeIn(2000);
-            boxBlurImage(frame.find('.low-res').get(0), blur.get(0), 20, false, 2);
-            blur.show();
+            blurContainer.children().fadeOut(2000, function(){
+                $(this).remove();
+            });
+            var $blur = createCanvas();
+            boxBlurImage(frame.find('.low-res').get(0), $blur.get(0), 20, false, 2);
+            $blur.fadeIn(2000);
         }, 500);
     }
 

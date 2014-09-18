@@ -16,14 +16,15 @@ function Highlight(model, conf){
     var padding = 15;
     var headerHeight = 0;
 
-    var boxBlurClass = null;
+    var blurContainer = null;
 
     function init(){
         $view = conf.view;
-        $viewList = (conf.listClass)? $view.find("."+conf.listClass) : $view;
+        $viewList = (conf.listClass)? $view.find("."+conf.listClass) : createFramesContainer();
         template = conf.template;
         $detailsView = (conf.detailsView)? conf.detailsView : [];
-        boxBlurClass =  (conf.boxBlurClass)? "." + conf.boxBlurClass : '.box-blur';
+
+        createBlurContainer();
 
         watch(model, "selectedPictureIndex", function(){
             onPictureSelected();
@@ -56,6 +57,18 @@ function Highlight(model, conf){
         });
     }
 
+    function createFramesContainer(){
+        var $container = $("<div class='frame-container'></div>");
+        $view.append($container);
+        return $container
+    }
+    
+    function createBlurContainer(){
+        blurContainer = $('<div class="blur-container"></div>');
+        $view.append(blurContainer);
+        return blurContainer;
+    }
+    
     function onPictureSelected(){
         if (isOpened) {
             if (model.selectedPictureIndex === null){
@@ -65,6 +78,7 @@ function Highlight(model, conf){
         }
         self.handleScroll();
         self.displayPicture();
+        blurContainer.empty();
     }
     
     function disableScroll(e){
@@ -101,6 +115,12 @@ function Highlight(model, conf){
         return $frame;
     }
 
+    function createCanvas(){
+        var $canvas = $('<canvas class="blur"/>');
+        blurContainer.append($canvas);
+        return $canvas;
+    }
+
     this.displayPicture = function(){
         if (!self.hasPicturesToDisplay()){
             self.close();
@@ -127,7 +147,6 @@ function Highlight(model, conf){
         newCurrentFrame.removeClass("prev-frame").addClass("current-frame");
         var newCurrentPicture = model.pictures[model.selectedPictureIndex];
         var newCurrentDimension = calculateDimension(newCurrentPicture);
-        newCurrentFrame.find(boxBlurClass).hide();
         newCurrentFrame.find(".large-photo").animate({
             left: newCurrentDimension.x
         }, 500, "swing", function(){
@@ -170,7 +189,6 @@ function Highlight(model, conf){
         newCurrentFrame.removeClass("next-frame").addClass("current-frame");
         var newCurrentPicture = model.pictures[model.selectedPictureIndex];
         var newCurrentDimension = calculateDimension(newCurrentPicture);
-        newCurrentFrame.find(boxBlurClass).hide();
         newCurrentFrame.find(".large-photo").animate({
             left: newCurrentDimension.x
         }, 500, "swing", function(){
@@ -231,9 +249,7 @@ function Highlight(model, conf){
             setPosition(currentFrame, dimension);
             showLowResolution(currentFrame, picture);
             showHighResolution(currentFrame, picture);
-            if (!currentFrame.find(boxBlurClass).is(':visible')){
-                showBlur(currentFrame, picture);
-            }
+            showBlur(currentFrame, picture);
         }
         if (prevFrame && model.selectedPictureIndex > 0) {
             picture = model.pictures[model.selectedPictureIndex - 1];
@@ -318,11 +334,14 @@ function Highlight(model, conf){
     }
 
     function showBlur(frame, picture){
+        clearTimeout(self.blurTimeout);
         self.blurTimeout = setTimeout(function(){
-            var blur = frame.find(boxBlurClass).hide();
-            blur.fadeIn(2000);
-            boxBlurImage(frame.find('.low-res').get(0), blur.get(0), 20, false, 2);
-            blur.show();
+            blurContainer.children().fadeOut(2000, function(){
+                $(this).remove();
+            });
+            var $blur = createCanvas();
+            boxBlurImage(frame.find('.low-res').get(0), $blur.get(0), 20, false, 2);
+            $blur.fadeIn(2000);
         }, 500);
     }
 
