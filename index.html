@@ -24,7 +24,7 @@
         });
         var highlight = new Highlight(model1, {
             view: $("#highlight"),
-            template: '<div class="photo-frame"><canvas class="box-blur"/><div class="large-photo"><img class="low-res" /><img class="high-res"/></div></div>'
+            template: '<div class="photo-frame"><div class="large-photo"><img class="low-res" /><img class="high-res"/></div></div>'
         })
         model1.loadAlbum('/');
         
@@ -59,22 +59,14 @@
         <img src="photos/edinburgh_03_thumb.jpg" width="640" height="426" data-photo="photos/edinburgh_03.jpg"/>
         <img src="photos/edinburgh_04_thumb.jpg" width="640" height="426" data-photo="photos/edinburgh_04.jpg"/>
     </div>
+    <h2><a id="what-is">What is Retrato-js?</a></h2>
+    <p></p>
     <h2><a id="getting-started">Getting started</a></h2>
     <div id="code-album1">
         <div data-height="350" data-theme-id="8536" data-slug-hash="Grpyx" data-default-tab="js" data-user="werneckpaiva" class='codepen'>
-            <pre><code>
-var model1 = new AlbumModel(new AlbumHtmlDelegate($(&quot;#album1 img&quot;)));
-var albumPhotos = new AlbumPhotos(model1, {
-        view: $(&quot;#album1&quot;),
-        template: &#39;&lt;img src=&quot;{{src}}&quot; width=&quot;{{width}}&quot; height=&quot;{{height}}&quot;/&gt;&#39;,
-        heightProportion: 0.25,
-        margin: 4
-});
-model1.loadAlbum(&#39;/&#39;);
-            </code></pre>
             <p>See the Pen <a href='http://codepen.io/werneckpaiva/pen/Grpyx/'>Grpyx</a> by Ricardo (<a href='http://codepen.io/werneckpaiva'>@werneckpaiva</a>) on <a href='http://codepen.io'>CodePen</a>.</p>
         </div>
-        <script async src="//codepen.io/assets/embed/ei.js"></script>
+        <!-- <script async src="//codepen.io/assets/embed/ei.js"></script> -->
     </div>
 </div>
 </body>
