@@ -60,7 +60,7 @@ function Highlight(model, conf){
     function createFramesContainer(){
         var $container = $("<div class='frame-container'></div>");
         $view.append($container);
-        return $container
+        return $container;
     }
     
     function createBlurContainer(){
