@@ -662,7 +662,7 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
     function createFramesContainer(){
         var $container = $("<div class='frame-container'></div>");
         $view.append($container);
-        return $container
+        return $container;
     }
     
     function createBlurContainer(){
