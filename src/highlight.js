@@ -19,10 +19,7 @@ function Highlight(model, conf){
     var blurContainer = null;
 
     function init(){
-        $view = conf.view;
-        $viewList = (conf.listClass)? $view.find("."+conf.listClass) : createFramesContainer();
-        template = conf.template;
-        $detailsView = (conf.detailsView)? conf.detailsView : [];
+        setConfiguration();
 
         createBlurContainer();
 
@@ -55,6 +52,17 @@ function Highlight(model, conf){
                 self.close();
             }
         });
+    }
+
+    function setConfiguration(){
+        // Required
+        $view = conf.view;
+        template = conf.template;
+
+        // Optional
+        $viewList = (conf.listClass)? $view.find("."+conf.listClass) : createFramesContainer();
+        $detailsView = (conf.detailsView)? conf.detailsView : [];
+        headerHeight = (conf.headerHeight)? parseInt(conf.headerHeight) : 0;
     }
 
     function createFramesContainer(){

@@ -49,10 +49,10 @@ var Fullscreen = {
     },
 
     isActive: function(){
-       return document.fullScreenElement !== null || 
-           document.webkitCurrentFullScreenElement !== null || 
-           document.mozFullScreenElement !== null || 
-           document.msFullscreenElement !== null;
+        return document.fullscreenElement || 
+        document.mozFullScreenElement || 
+        document.webkitFullscreenElement || 
+        document.msFullscreenElement;
     }
 };
 
@@ -87,6 +87,7 @@ function AlbumMenu(model, conf){
         });
 
         Fullscreen.onchange(function(event){
+            console.log('fullscreen change')
             $fullscreenButton.toggleClass("selected", Fullscreen.isActive());
         });
         
