@@ -87,7 +87,6 @@ function AlbumMenu(model, conf){
         });
 
         Fullscreen.onchange(function(event){
-            console.log('fullscreen change')
             $fullscreenButton.toggleClass("selected", Fullscreen.isActive());
         });
         
