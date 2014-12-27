@@ -39,15 +39,18 @@ describe("Creates model from images", function() {
         }, function(){ });
     }); 
 
-    it("should fail without pictures", function(done) {
+    it("should work without pictures", function(done) {
 
         var imgs = $("");
         var albumHtmlDelegate = new AlbumHtmlDelegate(imgs);
         albumHtmlDelegate.get('/', 
-                function(result){ },
-                function(){ 
+                function(result){ 
+                    expect(result).toBeDefined();
+                    expect(result.path).toBe('/');
+                    expect(result.pictures.length).toBe(0);
                     done();
-                });
+                },
+                function(){ });
     }); 
 
 });

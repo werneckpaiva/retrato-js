@@ -87,7 +87,6 @@ function AlbumMenu(model, conf){
         });
 
         Fullscreen.onchange(function(event){
-            console.log('fullscreen change')
             $fullscreenButton.toggleClass("selected", Fullscreen.isActive());
         });
         
@@ -611,12 +610,10 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
 
     var currentPictureIndex = null;
     var currentFrame = null;
-    var prevFrame = null;
-    var nextFrame = null;
 
     var isOpened = false;
 
-    var padding = 15;
+    var padding = 10;
     var headerHeight = 0;
 
     var blurContainer = null;
@@ -740,51 +737,7 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
         isOpened = true;
         $viewList.empty();
         createCurrentHighlight();
-        createLeftHighlight();
-        createRightHighlight();
         self.updateDisplay();
-    };
-
-    // Move from left to right
-    this.displayPrevPicture = function(){
-        if (!self.hasPicturesToDisplay()) return;
-        $viewList.find(".large-photo").stop();
-        if (model.selectedPictureIndex === 0) return;
-
-        var newRightPicture = model.pictures[model.selectedPictureIndex];
-        model.selectedPictureIndex--;
-
-        var newCurrentFrame = prevFrame;
-        newCurrentFrame.removeClass("prev-frame").addClass("current-frame");
-        var newCurrentPicture = model.pictures[model.selectedPictureIndex];
-        var newCurrentDimension = calculateDimension(newCurrentPicture);
-        newCurrentFrame.find(".large-photo").animate({
-            left: newCurrentDimension.x
-        }, 500, "swing", function(){
-            showBlur(newCurrentFrame, newCurrentPicture);
-            showHighResolution(newCurrentFrame, newCurrentPicture);
-        });
-
-        var newRightFrame = currentFrame;
-        newRightFrame.removeClass("current-frame").addClass("next-frame");
-        var newRightDimension = calculateDimensionRight(newRightPicture);
-        newRightFrame.find(".large-photo").animate({
-            left: newRightDimension.x
-        }, 500, "swing");
-
-        if (nextFrame) nextFrame.remove();
-        nextFrame = currentFrame;
-        currentFrame = prevFrame;
-        prevFrame = null;
-
-        // Set Image to the new Left
-        if (model.selectedPictureIndex > 0){
-            createLeftHighlight();
-            var newLeftPicture = model.pictures[model.selectedPictureIndex - 1];
-            var dimension = calculateDimensionLeft(newLeftPicture);
-            setPosition(prevFrame, dimension);
-            showLowResolution(prevFrame, newLeftPicture);
-        }
     };
 
     // Move from right to left
@@ -793,40 +746,30 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
         $viewList.find(".large-photo").stop();
         if (model.selectedPictureIndex >= (model.pictures.length - 1)) return;
 
-        var newLeftPicture = model.pictures[model.selectedPictureIndex];
         model.selectedPictureIndex++;
 
-        var newCurrentFrame = nextFrame;
-        newCurrentFrame.removeClass("next-frame").addClass("current-frame");
-        var newCurrentPicture = model.pictures[model.selectedPictureIndex];
-        var newCurrentDimension = calculateDimension(newCurrentPicture);
-        newCurrentFrame.find(".large-photo").animate({
-            left: newCurrentDimension.x
-        }, 500, "swing", function(){
-            showBlur(newCurrentFrame, newCurrentPicture);
-            showHighResolution(newCurrentFrame, newCurrentPicture);
-        });
+        self.showCurrentSelectedPicture();
 
-        var newLeftFrame = currentFrame;
-        newLeftFrame.removeClass("current-frame").addClass("prev-frame");
-        var newLeftDimension = calculateDimensionLeft(newLeftPicture);
-        newLeftFrame.find(".large-photo").animate({
-            left: newLeftDimension.x
-        }, 500, "swing");
+    };
 
-        if (prevFrame) prevFrame.remove();
-        prevFrame = currentFrame;
-        currentFrame = nextFrame;
-        nextFrame = null;
+    // Move from left to right
+    this.displayPrevPicture = function(){
+        if (!self.hasPicturesToDisplay()) return;
+        $viewList.find(".large-photo").stop();
+        if (model.selectedPictureIndex === 0) return;
 
-        // Set Image to the new Right
-        if (model.selectedPictureIndex < (model.pictures.length - 1)){
-            createRightHighlight();
-            var newRightPicture = model.pictures[model.selectedPictureIndex + 1];
-            var dimension = calculateDimensionRight(newRightPicture);
-            setPosition(nextFrame, dimension);
-            showLowResolution(nextFrame, newRightPicture);
+        model.selectedPictureIndex--;
+
+        self.showCurrentSelectedPicture();
+    };
+
+    this.showCurrentSelectedPicture = function(){
+        var previousFrame = currentFrame;
+        if (previousFrame !== null){
+            previousFrame.remove();
         }
+        createCurrentHighlight();
+        self.updateDisplay();
     };
 
     function createCurrentHighlight(){
@@ -835,44 +778,18 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
         $viewList.append(currentFrame);
     }
 
-    function createLeftHighlight(){
-        if (prevFrame) prevFrame.remove();
-        prevFrame = createHighlight();
-        prevFrame.addClass("prev-frame");
-        $viewList.append(prevFrame);
-    }
-
-    function createRightHighlight(){
-        if (nextFrame) nextFrame.remove();
-        nextFrame = createHighlight();
-        nextFrame.addClass("next-frame");
-        $viewList.append(nextFrame);
-    }
-
     this.updateDisplay = function(){
         if (!self.hasPicturesToDisplay()) return;
         if (!isOpened) return;
-        $view.fadeIn("slow");
-        var picture, dimension;
+        $view.show();
         if (currentFrame) {
-            picture = model.pictures[model.selectedPictureIndex];
-            dimension = calculateDimension(picture);
+            var picture = model.pictures[model.selectedPictureIndex];
+            var dimension = calculateDimension(picture);
+            currentFrame.find(".large-photo").addClass("visible");
             setPosition(currentFrame, dimension);
             showLowResolution(currentFrame, picture);
             showHighResolution(currentFrame, picture);
             showBlur(currentFrame, picture);
-        }
-        if (prevFrame && model.selectedPictureIndex > 0) {
-            picture = model.pictures[model.selectedPictureIndex - 1];
-            dimension = calculateDimensionLeft(picture);
-            setPosition(prevFrame, dimension);
-            showLowResolution(prevFrame, picture);
-        }
-        if (nextFrame && model.selectedPictureIndex < model.pictures.length - 1) {
-            picture = model.pictures[model.selectedPictureIndex + 1];
-            dimension = calculateDimensionRight(picture);
-            setPosition(nextFrame, dimension);
-            showLowResolution(nextFrame, picture);
         }
     };
 
@@ -992,6 +909,7 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
     this.albuns = null;
     this.pictures = null;
     this.visibility = null;
+    this.token = null;
 
     this.loading = false;
 
@@ -999,9 +917,17 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
     this.highlightOn = false;
     this.detailsOn = false;
 
-    this.loadAlbum = function(albumPath){
+    this.loadAlbum = function(albumPath, resultHandler, errorHandler){
         self.loading = true;
-        delegate.get(albumPath, loadAlbumResultHandler, loadAlbumFailHandler);
+        delegate.get(albumPath, 
+                function(result){
+                    loadAlbumResultHandler(result);
+                    if (resultHandler !== undefined) resultHandler(result);
+                }, 
+                function(error){
+                    loadAlbumFailHandler(error);
+                    if (errorHandler !== undefined) errorHandler(error);
+                });
     };
 
     function loadAlbumResultHandler(result){
@@ -1038,9 +964,6 @@ function AlbumAjaxDelegate(){
 
 function AlbumHtmlDelegate(imgs){
     this.get = function(albumPath, resultHandler, failHandler){
-        if (imgs.length === 0){
-            return failHandler();
-        }
         var result = {
                 path: albumPath,
                 pictures: []
