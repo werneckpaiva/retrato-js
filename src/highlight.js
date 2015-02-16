@@ -12,14 +12,14 @@ function Highlight(model, conf){
     var isOpened = false;
 
     var padding = 10;
-    var headerHeight = 0;
 
-    var blurContainer = null;
+    var $blurContainer = null;
 
     function init(){
         setConfiguration();
 
-        createBlurContainer();
+        create$blurContainer();
+        createNavArrows();
 
         watch(model, "selectedPictureIndex", function(){
             onPictureSelected();
@@ -33,7 +33,7 @@ function Highlight(model, conf){
             }
         });
 
-        $view.click(function(){
+        $blurContainer.click(function(){
             self.close();
         });
 
@@ -60,7 +60,21 @@ function Highlight(model, conf){
         // Optional
         $viewList = (conf.listClass)? $view.find("."+conf.listClass) : createFramesContainer();
         $detailsView = (conf.detailsView)? conf.detailsView : [];
-        headerHeight = (conf.headerHeight)? parseInt(conf.headerHeight) : 0;
+    }
+
+    function controlMenuBasedOnMouseMovement(){
+        var timer = null;
+        function mouseStoppedCallback(){
+            timer = setTimeout(function(){
+                
+            }, 1500);
+        }
+        $(document).mousemove(function( event ) {
+            clearTimeout(timer);
+            
+            mouseStoppedCallback();
+        });
+        mouseStoppedCallback();
     }
 
     function createFramesContainer(){
@@ -68,13 +82,26 @@ function Highlight(model, conf){
         $view.append($container);
         return $container;
     }
-    
-    function createBlurContainer(){
-        blurContainer = $('<div class="blur-container"></div>');
-        $view.append(blurContainer);
-        return blurContainer;
+
+    function create$blurContainer(){
+        $blurContainer = $('<div class="blur-container"></div>');
+        $view.append($blurContainer);
+        return $blurContainer;
     }
-    
+
+    function createNavArrows(){
+        var $btnPrev = $("<button class='btn-prev'>Previous</button>");
+        var $btnNext = $("<button class='btn-next'>Next</button>");
+        $btnPrev.click(function(){
+            self.displayPrevPicture();
+        });
+        $btnNext.click(function(){
+            self.displayNextPicture();
+        });
+        $view.append($btnPrev);
+        $view.append($btnNext);
+    }
+
     function onPictureSelected(){
         if (isOpened) {
             if (model.selectedPictureIndex === null){
@@ -84,7 +111,7 @@ function Highlight(model, conf){
         }
         self.handleScroll();
         self.displayPicture();
-        blurContainer.empty();
+        $blurContainer.empty();
     }
     
     function disableScroll(e){
@@ -123,7 +150,7 @@ function Highlight(model, conf){
 
     function createCanvas(){
         var $canvas = $('<canvas class="blur"/>');
-        blurContainer.append($canvas);
+        $blurContainer.append($canvas);
         return $canvas;
     }
 
@@ -138,7 +165,6 @@ function Highlight(model, conf){
         self.updateDisplay();
     };
 
-    // Move from right to left
     this.displayNextPicture = function(){
         if (!self.hasPicturesToDisplay()) return;
         $viewList.find(".large-photo").stop();
@@ -150,7 +176,6 @@ function Highlight(model, conf){
 
     };
 
-    // Move from left to right
     this.displayPrevPicture = function(){
         if (!self.hasPicturesToDisplay()) return;
         $viewList.find(".large-photo").stop();
@@ -162,10 +187,6 @@ function Highlight(model, conf){
     };
 
     this.showCurrentSelectedPicture = function(){
-        var previousFrame = currentFrame;
-        if (previousFrame !== null){
-            previousFrame.remove();
-        }
         createCurrentHighlight();
         self.updateDisplay();
     };
@@ -204,14 +225,14 @@ function Highlight(model, conf){
         var newHeight = Math.round(newWidth / picture.ratio);
         var x = 0;
         var y = Math.round((windowHeight - newHeight) / 2);
-        if (y < headerHeight){
-            newHeight = windowHeight - (headerHeight + (padding * 2));
+        if (y < 0){
+            newHeight = windowHeight - (padding * 2);
             newWidth = Math.round(newHeight * picture.ratio);
             y = 0;
             x = Math.round(($window.width() - newWidth) / 2);
         }
         x = (windowWidth - newWidth) / 2;
-        y = ((windowHeight - headerHeight - newHeight) / 2) + headerHeight;
+        y = (windowHeight - newHeight) / 2;
         return {newWidth: newWidth, newHeight: newHeight, x:x, y:y};
     }
 
@@ -262,12 +283,12 @@ function Highlight(model, conf){
     function showBlur(frame, picture){
         clearTimeout(self.blurTimeout);
         self.blurTimeout = setTimeout(function(){
-            blurContainer.children().fadeOut(2000, function(){
+            $blurContainer.children().fadeOut(2000, function(){
                 $(this).remove();
             });
             var $blur = createCanvas();
             boxBlurImage(frame.find('.low-res').get(0), $blur.get(0), 20, false, 2);
-            $blur.fadeIn(2000);
+            $blur.fadeIn(1000);
         }, 500);
     }
 

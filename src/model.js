@@ -8,6 +8,7 @@ function AlbumModel(albumDelegate){
     this.pictures = null;
     this.visibility = null;
     this.token = null;
+    this.cover = null;
 
     this.loading = false;
 

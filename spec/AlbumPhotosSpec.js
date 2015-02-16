@@ -8,15 +8,17 @@ describe("Render pictures from images", function() {
             template: '<img src="{{src}}" width="{{width}}" height="{{height}}"/>',
             lazyLoad: false
         });
-        $container.on("DOMSubtreeModified", function() {
+        var domSubtreeModifiedHandler = function() {
             $imgs = $container.find("img");
             expect($imgs.length).toBe(1);
             var $el = $($imgs.get(0));
             expect($el.attr("src")).toBe('img1_thumb.jpg');
             expect($el.attr("width")).toBeDefined();
             expect($el.attr("height")).toBeDefined();
+            $container.off("DOMSubtreeModified", domSubtreeModifiedHandler);
             done();
-        });
+        };
+        $container.on("DOMSubtreeModified", domSubtreeModifiedHandler);
         model.pictures = [
             {width: 640, height: 426, thumb: 'img1_thumb.jpg', highlight: 'img1.jpg', ratio: 1.502}
         ];
@@ -27,13 +29,16 @@ describe("Render pictures from images", function() {
         var model = new AlbumModel(null);
         var albumPhotos = new AlbumPhotos(model, {
             view: $container, 
-            template: '<img src="{{src}}" width="{{width}}" height="{{height}}"/>'
+            template: '<img src="{{src}}" width="{{width}}" height="{{height}}"/>',
+            lazyLoad: false
         });
-        $container.on("DOMSubtreeModified", function() {
+        var domSubtreeModifiedHandler = function() {
             $imgs = $container.find("img");
             expect($imgs.length).toBe(4);
+            $container.off("DOMSubtreeModified", domSubtreeModifiedHandler);
             done();
-        });
+        };
+        $container.on("DOMSubtreeModified", domSubtreeModifiedHandler);
         model.pictures = [
             {width: 640, height: 426, thumb: 'img1_thumb.jpg', highlight: 'img1.jpg', ratio: 1.502},
             {width: 426, height: 640, thumb: 'img2_thumb.jpg', highlight: 'img2.jpg', ratio: 0.665},

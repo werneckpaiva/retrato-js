@@ -79,6 +79,9 @@ function AlbumPhotos(model, conf){
         $(window).resize(function(){
             self.resizePictures();
         });
+        $(window).scroll(function(){
+            self.revealImages();
+        });
     }
 
     function setConfiguration(){
@@ -92,7 +95,7 @@ function AlbumPhotos(model, conf){
         lazyLoad = (conf.lazyLoad)? conf.lazyLoad : false;
         margin = (conf.margin)?  conf.margin : 0;
     }
-    
+
     this.displayPictures = function(picturesChanged){
         if (picturesChanged===false){
             return;
@@ -131,6 +134,8 @@ function AlbumPhotos(model, conf){
             });
         if (lazyLoad){
             startLazyLoading();
+        } else {
+            self.revealImages();
         }
     };
 
@@ -147,6 +152,7 @@ function AlbumPhotos(model, conf){
             $(this).css("width", width).css("height", height);
             $(this).find("img").attr("width", width).attr("height", height);
         });
+        self.revealImages();
     };
 
     function startLazyLoading(){
@@ -155,6 +161,7 @@ function AlbumPhotos(model, conf){
             if (index >= model.pictures.length){
                 return;
             }
+            self.revealImages();
             if (image.src == model.pictures[index].thumb){
                 index++;
                 loadNextPicture();
@@ -162,19 +169,32 @@ function AlbumPhotos(model, conf){
                 image.src = model.pictures[index].thumb;
             }
         }
-
+        $viewList.find("img").hide();
         var index = 0;
         var image = new Image();
         image.onload = function(){
             $viewList.find("img:eq("+index+")")
-                .attr("src", this.src)
-                .show();
+                  .data("img-src", this.src);
+//                .attr("src", this.src)
+//                .show();
             index++;
             loadNextPicture();
         };
 
         loadNextPicture();
     }
+
+    this.revealImages = function(){
+        var scrollTop = $(window).scrollTop();
+        var bottom = scrollTop + $viewList.parent().position().top + $viewList.parent().height() - 30;
+        $viewList.find("img[src='']").each(function(index, item){
+            $item = $(item);
+            if ($item.attr('src')) return;
+            if ($item.parent().position().top <= bottom){
+                $item.hide().attr("src", $item.data("img-src")).fadeIn(1000);
+            }
+        });
+    };
 
     init();
 };/*
@@ -534,14 +554,14 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
     var isOpened = false;
 
     var padding = 10;
-    var headerHeight = 0;
 
-    var blurContainer = null;
+    var $blurContainer = null;
 
     function init(){
         setConfiguration();
 
-        createBlurContainer();
+        create$blurContainer();
+        createNavArrows();
 
         watch(model, "selectedPictureIndex", function(){
             onPictureSelected();
@@ -555,7 +575,7 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
             }
         });
 
-        $view.click(function(){
+        $blurContainer.click(function(){
             self.close();
         });
 
@@ -582,7 +602,6 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
         // Optional
         $viewList = (conf.listClass)? $view.find("."+conf.listClass) : createFramesContainer();
         $detailsView = (conf.detailsView)? conf.detailsView : [];
-        headerHeight = (conf.headerHeight)? parseInt(conf.headerHeight) : 0;
     }
 
     function createFramesContainer(){
@@ -590,13 +609,26 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
         $view.append($container);
         return $container;
     }
-    
-    function createBlurContainer(){
-        blurContainer = $('<div class="blur-container"></div>');
-        $view.append(blurContainer);
-        return blurContainer;
+
+    function create$blurContainer(){
+        $blurContainer = $('<div class="blur-container"></div>');
+        $view.append($blurContainer);
+        return $blurContainer;
     }
-    
+
+    function createNavArrows(){
+        var $btnPrev = $("<button class='btn-prev'>Previous</button>")
+        var $btnNext = $("<button class='btn-next'>Next</button>");
+        $btnPrev.click(function(){
+            self.displayPrevPicture();
+        });
+        $btnNext.click(function(){
+            self.displayNextPicture();
+        });
+        $view.append($btnPrev);
+        $view.append($btnNext);
+    }
+
     function onPictureSelected(){
         if (isOpened) {
             if (model.selectedPictureIndex === null){
@@ -606,7 +638,7 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
         }
         self.handleScroll();
         self.displayPicture();
-        blurContainer.empty();
+        $blurContainer.empty();
     }
     
     function disableScroll(e){
@@ -645,7 +677,7 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
 
     function createCanvas(){
         var $canvas = $('<canvas class="blur"/>');
-        blurContainer.append($canvas);
+        $blurContainer.append($canvas);
         return $canvas;
     }
 
@@ -660,7 +692,6 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
         self.updateDisplay();
     };
 
-    // Move from right to left
     this.displayNextPicture = function(){
         if (!self.hasPicturesToDisplay()) return;
         $viewList.find(".large-photo").stop();
@@ -672,7 +703,6 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
 
     };
 
-    // Move from left to right
     this.displayPrevPicture = function(){
         if (!self.hasPicturesToDisplay()) return;
         $viewList.find(".large-photo").stop();
@@ -726,14 +756,14 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
         var newHeight = Math.round(newWidth / picture.ratio);
         var x = 0;
         var y = Math.round((windowHeight - newHeight) / 2);
-        if (y < headerHeight){
-            newHeight = windowHeight - (headerHeight + (padding * 2));
+        if (y < 0){
+            newHeight = windowHeight - (padding * 2);
             newWidth = Math.round(newHeight * picture.ratio);
             y = 0;
             x = Math.round(($window.width() - newWidth) / 2);
         }
         x = (windowWidth - newWidth) / 2;
-        y = ((windowHeight - headerHeight - newHeight) / 2) + headerHeight;
+        y = (windowHeight - newHeight) / 2;
         return {newWidth: newWidth, newHeight: newHeight, x:x, y:y};
     }
 
@@ -784,12 +814,12 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
     function showBlur(frame, picture){
         clearTimeout(self.blurTimeout);
         self.blurTimeout = setTimeout(function(){
-            blurContainer.children().fadeOut(2000, function(){
+            $blurContainer.children().fadeOut(2000, function(){
                 $(this).remove();
             });
             var $blur = createCanvas();
             boxBlurImage(frame.find('.low-res').get(0), $blur.get(0), 20, false, 2);
-            $blur.fadeIn(2000);
+            $blur.fadeIn(1000);
         }, 500);
     }
 
@@ -830,6 +860,7 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
     this.pictures = null;
     this.visibility = null;
     this.token = null;
+    this.cover = null;
 
     this.loading = false;
 
