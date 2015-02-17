@@ -103,7 +103,7 @@ function Highlight(model, conf){
         self.handleScroll();
 
         MouseTimer.on("mousewait", MOUSE_WAIT_TIMEOUT, hideArrows);
-        $(document).on("mousemove", showArrows)
+        $(document).on("mousemove", showArrows);
 
         self.displayPicture();
         $blurContainer.empty();
@@ -134,7 +134,7 @@ function Highlight(model, conf){
     }
 
     function repositionArrows(){
-        var height = $view.height()
+        var height = $view.height();
         var top = height / 2;
         $btnPrev.css("top", top - $btnPrev.height() / 2);
         $btnNext.css("top", top - $btnNext.height() / 2);
@@ -151,7 +151,7 @@ function Highlight(model, conf){
         isOpened = false;
         self.unhandleScroll();
         MouseTimer.off("mousewait", MOUSE_WAIT_TIMEOUT, hideArrows);
-        $(document).off("mousemove", showArrows)
+        $(document).off("mousemove", showArrows);
         $view.fadeOut("slow");
         model.selectedPictureIndex = null;
         Fullscreen.close();

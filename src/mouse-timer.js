@@ -35,13 +35,13 @@ function MouseTimer(){
         }
         listenersWait[time].push(handler);
         addTimer(time);
-    };
+    }
 
     this.on = function(event, time, handler){
         if (event.toLowerCase() == "mousewait"){
             mousewait(time, handler);
         }
-    }
+    };
 
     this.off = function(event, time, handler){
         if (event.toLowerCase() == "mousewait"){
@@ -51,7 +51,7 @@ function MouseTimer(){
                 listenersWait[time].splice(pos, 1);
             }
         }
-    }
+    };
 
     init();
 }
