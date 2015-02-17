@@ -2,23 +2,18 @@ function MouseTimer(){
     timers = {};
 
     listenersWait = {};
-    listenersMove = [];
 
     function init(){
         setMouseMoveHandler();
     }
 
     function setMouseMoveHandler(){
-        $(document).mousemove(function( event ) {
+        $(document).mousemove(function(event) {
             for (var time in timers){
-                var timerList = timers[time];
-                for (var timer in timerList){
-                    clearTimeout(timer);
-                }
+                var timer = timers[time];
+                clearTimeout(timer);
+                delete timers[time];
                 addTimer(time);
-            }
-            for (var handler in listenersMove) {
-                handler();
             }
         });
     }
@@ -33,8 +28,8 @@ function MouseTimer(){
             }, time);
         }
     }
-        
-    this.mousewait = function(time, handler){
+
+    function mousewait(time, handler){
         if (!listenersWait[time]){
             listenersWait[time] = [];
         }
@@ -42,9 +37,21 @@ function MouseTimer(){
         addTimer(time);
     };
 
-    this.mousemove = function(handler){
-        listenersMove.push(handler);
-    };
+    this.on = function(event, time, handler){
+        if (event.toLowerCase() == "mousewait"){
+            mousewait(time, handler);
+        }
+    }
+
+    this.off = function(event, time, handler){
+        if (event.toLowerCase() == "mousewait"){
+            if (!listenersWait[time]) return;
+            var pos = listenersWait[time].indexOf(handler);
+            if (pos >= 0){
+                listenersWait[time].splice(pos, 1);
+            }
+        }
+    }
 
     init();
 }

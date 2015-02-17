@@ -15,6 +15,11 @@ function Highlight(model, conf){
 
     var $blurContainer = null;
 
+    var MOUSE_WAIT_TIMEOUT = 2000;
+    
+    var $btnPrev = null;
+    var $btnNect = null;
+
     function init(){
         setConfiguration();
 
@@ -50,6 +55,7 @@ function Highlight(model, conf){
                 self.close();
             }
         });
+
     }
 
     function setConfiguration(){
@@ -60,21 +66,6 @@ function Highlight(model, conf){
         // Optional
         $viewList = (conf.listClass)? $view.find("."+conf.listClass) : createFramesContainer();
         $detailsView = (conf.detailsView)? conf.detailsView : [];
-    }
-
-    function controlMenuBasedOnMouseMovement(){
-        var timer = null;
-        function mouseStoppedCallback(){
-            timer = setTimeout(function(){
-                
-            }, 1500);
-        }
-        $(document).mousemove(function( event ) {
-            clearTimeout(timer);
-            
-            mouseStoppedCallback();
-        });
-        mouseStoppedCallback();
     }
 
     function createFramesContainer(){
@@ -90,8 +81,8 @@ function Highlight(model, conf){
     }
 
     function createNavArrows(){
-        var $btnPrev = $("<button class='btn-prev'>Previous</button>");
-        var $btnNext = $("<button class='btn-next'>Next</button>");
+        $btnPrev = $("<button class='btn-prev'><span>&lt;</span></button>");
+        $btnNext = $("<button class='btn-next'><span>&gt;</span></button>");
         $btnPrev.click(function(){
             self.displayPrevPicture();
         });
@@ -110,6 +101,10 @@ function Highlight(model, conf){
             return;
         }
         self.handleScroll();
+
+        MouseTimer.on("mousewait", MOUSE_WAIT_TIMEOUT, hideArrows);
+        $(document).on("mousemove", showArrows)
+
         self.displayPicture();
         $blurContainer.empty();
     }
@@ -128,6 +123,23 @@ function Highlight(model, conf){
         $('body').off('mousewheel', disableScroll);
     };
 
+    function showArrows(){
+        $btnPrev.fadeIn();
+        $btnNext.fadeIn();
+    }
+
+    function hideArrows(){
+        $btnPrev.fadeOut();
+        $btnNext.fadeOut();
+    }
+
+    function repositionArrows(){
+        var height = $view.height()
+        var top = height / 2;
+        $btnPrev.css("top", top - $btnPrev.height() / 2);
+        $btnNext.css("top", top - $btnNext.height() / 2);
+    }
+
     this.hasPicturesToDisplay = function(){
         return (model.selectedPictureIndex !== null && 
                 model.selectedPictureIndex >= 0 && 
@@ -138,6 +150,8 @@ function Highlight(model, conf){
     this.close = function(){
         isOpened = false;
         self.unhandleScroll();
+        MouseTimer.off("mousewait", MOUSE_WAIT_TIMEOUT, hideArrows);
+        $(document).off("mousemove", showArrows)
         $view.fadeOut("slow");
         model.selectedPictureIndex = null;
         Fullscreen.close();
@@ -187,6 +201,10 @@ function Highlight(model, conf){
     };
 
     this.showCurrentSelectedPicture = function(){
+        var previousFrame = currentFrame;
+        if (previousFrame !== null){
+            previousFrame.remove();
+        }
         createCurrentHighlight();
         self.updateDisplay();
     };
@@ -206,9 +224,11 @@ function Highlight(model, conf){
             var dimension = calculateDimension(picture);
             currentFrame.find(".large-photo").addClass("visible");
             setPosition(currentFrame, dimension);
+            repositionArrows();
             showLowResolution(currentFrame, picture);
             showHighResolution(currentFrame, picture);
             showBlur(currentFrame, picture);
+            
         }
     };
 
