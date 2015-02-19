@@ -186,7 +186,8 @@ function AlbumPhotos(model, conf){
 
     this.revealImages = function(){
         var scrollTop = $(window).scrollTop();
-        var bottom = scrollTop + $viewList.parent().position().top + $viewList.parent().height() - 30;
+        var positionTop = ($viewList.parent().position())? $viewList.parent().position().top : 0;
+        var bottom = scrollTop + positionTop + $viewList.parent().height() - 30;
         $viewList.find("img[src='']").each(function(index, item){
             $item = $(item);
             if ($item.attr('src')) return;
@@ -557,6 +558,11 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
 
     var $blurContainer = null;
 
+    var MOUSE_WAIT_TIMEOUT = 2000;
+    
+    var $btnPrev = null;
+    var $btnNect = null;
+
     function init(){
         setConfiguration();
 
@@ -592,6 +598,7 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
                 self.close();
             }
         });
+
     }
 
     function setConfiguration(){
@@ -617,8 +624,8 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
     }
 
     function createNavArrows(){
-        var $btnPrev = $("<button class='btn-prev'>Previous</button>")
-        var $btnNext = $("<button class='btn-next'>Next</button>");
+        $btnPrev = $("<button class='btn-prev'><span>&lt;</span></button>");
+        $btnNext = $("<button class='btn-next'><span>&gt;</span></button>");
         $btnPrev.click(function(){
             self.displayPrevPicture();
         });
@@ -637,6 +644,10 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
             return;
         }
         self.handleScroll();
+
+        MouseTimer.on("mousewait", MOUSE_WAIT_TIMEOUT, hideArrows);
+        $(document).on("mousemove", showArrows);
+
         self.displayPicture();
         $blurContainer.empty();
     }
@@ -655,6 +666,23 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
         $('body').off('mousewheel', disableScroll);
     };
 
+    function showArrows(){
+        $btnPrev.fadeIn();
+        $btnNext.fadeIn();
+    }
+
+    function hideArrows(){
+        $btnPrev.fadeOut();
+        $btnNext.fadeOut();
+    }
+
+    function repositionArrows(){
+        var height = $view.height();
+        var top = height / 2;
+        $btnPrev.css("top", top - $btnPrev.height() / 2);
+        $btnNext.css("top", top - $btnNext.height() / 2);
+    }
+
     this.hasPicturesToDisplay = function(){
         return (model.selectedPictureIndex !== null && 
                 model.selectedPictureIndex >= 0 && 
@@ -665,6 +693,8 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
     this.close = function(){
         isOpened = false;
         self.unhandleScroll();
+        MouseTimer.off("mousewait", MOUSE_WAIT_TIMEOUT, hideArrows);
+        $(document).off("mousemove", showArrows);
         $view.fadeOut("slow");
         model.selectedPictureIndex = null;
         Fullscreen.close();
@@ -737,9 +767,11 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
             var dimension = calculateDimension(picture);
             currentFrame.find(".large-photo").addClass("visible");
             setPosition(currentFrame, dimension);
+            repositionArrows();
             showLowResolution(currentFrame, picture);
             showHighResolution(currentFrame, picture);
             showBlur(currentFrame, picture);
+            
         }
     };
 
@@ -935,7 +967,66 @@ function AlbumHtmlDelegate(imgs){
         });
         resultHandler(result);
     };
-};function Resize(pictures, heightProportion){
+};function MouseTimer(){
+    timers = {};
+
+    listenersWait = {};
+
+    function init(){
+        setMouseMoveHandler();
+    }
+
+    function setMouseMoveHandler(){
+        $(document).mousemove(function(event) {
+            for (var time in timers){
+                var timer = timers[time];
+                clearTimeout(timer);
+                delete timers[time];
+                addTimer(time);
+            }
+        });
+    }
+
+    function addTimer(time){
+        if (!timers[time]) {
+            timers[time] = setTimeout(function(){
+                for (var i in listenersWait[time]){
+                    var handler = listenersWait[time][i];
+                    handler();
+                }
+            }, time);
+        }
+    }
+
+    function mousewait(time, handler){
+        if (!listenersWait[time]){
+            listenersWait[time] = [];
+        }
+        listenersWait[time].push(handler);
+        addTimer(time);
+    }
+
+    this.on = function(event, time, handler){
+        if (event.toLowerCase() == "mousewait"){
+            mousewait(time, handler);
+        }
+    };
+
+    this.off = function(event, time, handler){
+        if (event.toLowerCase() == "mousewait"){
+            if (!listenersWait[time]) return;
+            var pos = listenersWait[time].indexOf(handler);
+            if (pos >= 0){
+                listenersWait[time].splice(pos, 1);
+            }
+        }
+    };
+
+    init();
+}
+
+var MouseTimer = new MouseTimer();
+;function Resize(pictures, heightProportion){
     this.pictures = pictures;
     this.HEIGHT_PROPORTION = 0.45;
     if (heightProportion){

@@ -57,15 +57,3 @@ function MouseTimer(){
 }
 
 var MouseTimer = new MouseTimer();
-//var timer = null;
-//function mouseStoppedCallback(){
-//    timer = setTimeout(function(){
-//        if (model.selectedPictureIndex !== null) toggleMenu(true);
-//    }, 1500);
-//}
-//$(document).mousemove(function( event ) {
-//    clearTimeout(timer);
-//    if (model.selectedPictureIndex !== null) toggleMenu(false);
-//    mouseStoppedCallback();
-//});
-//mouseStoppedCallback();
