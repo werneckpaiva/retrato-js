@@ -41,7 +41,7 @@ module.exports = function(grunt) {
             }   
         }, 
         jasmine : {
-            retrato-js: {
+            'retrato-js': {
                 src : '<%= config.src %>/**/*.js',
                 version: '2.0.0',
                 tasks: 'jasmine:pivotal:build',
