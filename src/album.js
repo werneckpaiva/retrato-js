@@ -96,6 +96,12 @@ function AlbumPhotos(model, conf){
         margin = (conf.margin)?  conf.margin : 0;
     }
 
+    this.calculatePicturesSizes = function(width, height) {
+        var resize = new Resize(model.pictures, heightProportion);
+        var newPictures = resize.doResize(width, height);
+        return newPictures;
+    };
+
     this.displayPictures = function(picturesChanged){
         if (picturesChanged===false){
             return;
@@ -108,17 +114,15 @@ function AlbumPhotos(model, conf){
         }
         $view.show();
 
-        var resize = new Resize(model.pictures, heightProportion);
         currentWidth = $view.width();
-        var newPictures = resize.doResize(currentWidth, $(window).height());
-
+        var newPictures = self.calculatePicturesSizes(currentWidth, $(window).height());
         var content = "";
         for (var i=0; i<newPictures.length; i++){
             var p = newPictures[i];
-            var params = {
+            var params = $.extend(model.pictures[i], {
                     width: p.newWidth-margin,
                     height: p.newHeight-margin
-            };
+            });
             if (!lazyLoad){
                 params.src = model.pictures[i].thumb;
             }
@@ -143,8 +147,7 @@ function AlbumPhotos(model, conf){
         var newWidth = $view.width();
         if (newWidth == currentWidth) return;
         currentWidth = $view.width();
-        var resize = new Resize(model.pictures, heightProportion);
-        var newPictures = resize.doResize(currentWidth, $(window).height());
+        var newPictures = self.calculatePicturesSizes(currentWidth, $(window).height());
         $viewList.children().each(function(index, item){
             var p = newPictures[index];
             var width = (p.newWidth-margin);
@@ -190,7 +193,6 @@ function AlbumPhotos(model, conf){
         var bottom = scrollTop + positionTop + $viewList.parent().height() - 30;
         $viewList.find("img[src='']").each(function(index, item){
             $item = $(item);
-            if ($item.attr('src')) return;
             if ($item.parent().position().top <= bottom){
                 $item.hide().attr("src", $item.data("img-src")).fadeIn(1000);
             }

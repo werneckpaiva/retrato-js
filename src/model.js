@@ -71,14 +71,15 @@ function AlbumHtmlDelegate(imgs){
             $el = $(element);
             var ratio = parseFloat($el.attr("width")) / parseFloat($el.attr("height"));
             ratio = Math.round(ratio * 1000) / 1000;
-            var picture = {
+            var picture = $el.data();
+            $.extend(picture, {
                     width: $el.attr("width"),
                     height: $el.attr("height"),
                     thumb: $el.attr("src"),
                     url: $el.data("photo"),
                     highlight: $el.data("photo"),
                     ratio: ratio
-            };
+            });
             result.pictures.push(picture);
         });
         resultHandler(result);
