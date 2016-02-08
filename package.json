@@ -1,6 +1,6 @@
 {
   "name": "retrato-js",
-  "version": "0.1.9.1",
+  "version": "0.1.10",
   "description": "Perfect balanced Photo Album javascript plugin",
   "directories": {
     "test": "spec"
