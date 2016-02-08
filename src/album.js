@@ -98,8 +98,8 @@ function AlbumPhotos(model, conf){
 
     this.calculatePicturesSizes = function(width, height) {
         var resize = new Resize(model.pictures, heightProportion);
-        var newPictures = resize.doResize(width, height);
-        return newPictures;
+        var picturesSizes = resize.doResize(width, height);
+        return picturesSizes;
     };
 
     this.displayPictures = function(picturesChanged){
@@ -115,7 +115,9 @@ function AlbumPhotos(model, conf){
         $view.show();
 
         currentWidth = $view.width();
-        var newPictures = self.calculatePicturesSizes(currentWidth, $(window).height());
+        var picturesSizes = self.calculatePicturesSizes(currentWidth, $(window).height());
+        var totalHeight = picturesSizes.totalHeight;
+        var newPictures = picturesSizes.pictures;
         var content = "";
         for (var i=0; i<newPictures.length; i++){
             var p = newPictures[i];

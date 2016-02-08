@@ -8,19 +8,12 @@ function Resize(pictures, heightProportion){
 
 Resize.prototype.doResize = function(viewWidth, viewHeight){
     viewWidth = Math.floor(viewWidth);
-//    viewWidth--;
     var idealHeight = parseInt(viewHeight * this.HEIGHT_PROPORTION);
 
     var sumWidths = this.sumWidth(idealHeight);
     var rows = Math.ceil(sumWidths / viewWidth);
 
-//    if (rows <= 1){
-//        // fallback to standard size
-//        console.log("1 row")
-//        this.resizeToSameHeight(idealHeight)
-//    } else {
-      return this.resizeUsingLinearPartitions(rows, viewWidth);
-//    }
+    return this.resizeUsingLinearPartitions(rows, viewWidth);
 };
 
 Resize.prototype.sumWidth = function(height){
@@ -53,6 +46,7 @@ Resize.prototype.resizeUsingLinearPartitions = function(rows, viewWidth){
     var partitions = linearPartition(weights, rows);
     var index = 0;
     var newDimensions = [];
+    var totalHeight = 0;
     for(i in partitions){
         partition = partitions[i];
         var rowList = [];
@@ -66,6 +60,7 @@ Resize.prototype.resizeUsingLinearPartitions = function(rows, viewWidth){
             summedRatios += p.ratio;
         }
         var rowHeight = (viewWidth / summedRatios);
+        totalHeight += rowHeight;
         var rowWidth = 0;
         for (j in rowList){
             p = rowList[j];
@@ -76,7 +71,7 @@ Resize.prototype.resizeUsingLinearPartitions = function(rows, viewWidth){
             newDimensions.push(dimension);
         }
     }
-    return newDimensions;
+    return {pictures: newDimensions, totalHeight: totalHeight};
 };
 
 function linearPartition(seq, k){
