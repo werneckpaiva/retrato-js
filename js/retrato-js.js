@@ -131,6 +131,7 @@ function AlbumPhotos(model, conf){
             content += Mustache.render(template, params);
         }
         $viewList.html(content);
+        $viewList.height(totalHeight);
         $viewList.find("img")
             .each(function(i, el){
                 $(el).data("index", i);
@@ -149,7 +150,9 @@ function AlbumPhotos(model, conf){
         var newWidth = $view.width();
         if (newWidth == currentWidth) return;
         currentWidth = $view.width();
-        var newPictures = self.calculatePicturesSizes(currentWidth, $(window).height());
+        var resizedCalc = self.calculatePicturesSizes(currentWidth, $(window).height());
+        var newPictures = resizedCalc.pictures;
+        var totalHeight = resizedCalc.totalHeight;
         $viewList.children().each(function(index, item){
             var p = newPictures[index];
             var width = (p.newWidth-margin);
@@ -157,6 +160,7 @@ function AlbumPhotos(model, conf){
             $(this).css("width", width).css("height", height);
             $(this).find("img").attr("width", width).attr("height", height);
         });
+        $viewList.height(totalHeight);
         self.revealImages();
     };
 
