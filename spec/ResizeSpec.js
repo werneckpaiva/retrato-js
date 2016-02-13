@@ -7,8 +7,7 @@ describe("Resize pictures", function() {
         var picturesInput = [{ratio: LANDSCAPE}, {ratio:LANDSCAPE}];
         var resize = new Resize(picturesInput);
         resize.HEIGHT_PROPORTION = 0.5;
-        var pictures = resize.doResize(1100, 800);
-
+        var pictures = resize.doResize(1100, 800).pictures;
         for (var i in pictures){
             expect(pictures[i].newHeight).toBe(412);
             expect(pictures[i].newWidth).toBe(550);
@@ -20,7 +19,7 @@ describe("Resize pictures", function() {
         var picturesInput = [{ratio: LANDSCAPE}, {ratio:LANDSCAPE}, {ratio:LANDSCAPE}, {ratio:LANDSCAPE}];
         var resize = new Resize(pictures);
         resize.HEIGHT_PROPORTION = 0.5;
-        var pictures = resize.doResize(1100, 800);
+        var pictures = resize.doResize(1100, 800).pictures;
 
         for (var i in pictures){
             expect(pictures[i].newHeight).toBe(412);
