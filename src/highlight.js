@@ -65,7 +65,7 @@ function Highlight(model, conf){
         $view = conf.view;
         template = (conf.template)?
                         conf.template:
-                        '<div class="photo-frame"><div class="large-photo"><img class="low-res" /><img class="high-res"/></div></div>'
+                        '<div class="photo-frame"><div class="large-photo"><img class="low-res" /><img class="high-res"/></div></div>';
         // Optional
         $viewList = (conf.listClass)? $view.find("."+conf.listClass) : createFramesContainer();
         $detailsView = (conf.detailsView)? conf.detailsView : [];
@@ -347,7 +347,7 @@ function Highlight(model, conf){
     }
 
     function updateDetailValues(){
-        if ($detailsView.length == 0) return;
+        if ($detailsView.length === 0) return;
         var picture = model.pictures[model.selectedPictureIndex];
         if (!picture) return;
         $detailsView.find(".file-name").html(picture.filename);
