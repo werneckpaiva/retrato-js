@@ -49,92 +49,12 @@ var Fullscreen = {
     },
 
     isActive: function(){
-       return document.fullScreenElement !== null || 
-           document.webkitCurrentFullScreenElement !== null || 
-           document.mozFullScreenElement !== null || 
-           document.msFullscreenElement !== null;
+        return document.fullscreenElement || 
+        document.mozFullScreenElement || 
+        document.webkitFullscreenElement || 
+        document.msFullscreenElement;
     }
 };
-
-
-function AlbumMenu(model, conf){
-
-    var self = this;
-
-    var $view = null;
-    var $detailsButton = null;
-    var $fullscreenButton = null;
-
-    function init(){
-        $view = conf.view;
-        $detailsButton = conf.detailsButton;
-        $fullscreenButton = conf.fullscreenButton;
-
-        watch(model, "selectedPictureIndex", function(){
-            pinMenu();
-            showHideDetailsButton();
-            showHideFullscreenButton();
-        });
-
-        $detailsButton.click(function(event){
-            event.preventDefault();
-            showHideDetails();
-        });
-
-        $fullscreenButton.click(function(event){
-            event.preventDefault();
-            openCloseFullscreen();
-        });
-
-        Fullscreen.onchange(function(event){
-            $fullscreenButton.toggleClass("selected", Fullscreen.isActive());
-        });
-        
-        showHideDetailsButton();
-        showHideFullscreenButton();
-    }
-
-    function pinMenu(){
-        if (model.selectedPictureIndex !== null){
-            $view.addClass("headroom--pinned").addClass("headroom--top");
-            $view.removeClass("headroom--not-top").removeClass("headroom--unpinned");
-        }
-    }
-
-    function showHideDetailsButton(){
-        if (model.selectedPictureIndex === null){
-            model.detailsOn = false;
-            $detailsButton.hide();
-        } else {
-            $detailsButton.show();
-        }
-    }
-
-    function showHideDetails(){
-        model.detailsOn = !model.detailsOn;
-        $detailsButton.toggleClass("selected", model.detailsOn);
-    }
-
-    function showHideFullscreenButton(){
-        if (model.selectedPictureIndex === null){
-            model.detailsOn = false;
-            $fullscreenButton.hide();
-        } else {
-            $fullscreenButton.show();
-        }
-    }
-
-    function openCloseFullscreen(){
-        if (Fullscreen.isActive()){
-            Fullscreen.close();
-        } else {
-            Fullscreen.open(document.getElementById("content"));
-        }
-    }
-
-    init();
-}
-
 
 function AlbumPhotos(model, conf){
 
@@ -159,6 +79,9 @@ function AlbumPhotos(model, conf){
         $(window).resize(function(){
             self.resizePictures();
         });
+        $(window).scroll(function(){
+            self.revealImages();
+        });
     }
 
     function setConfiguration(){
@@ -172,7 +95,13 @@ function AlbumPhotos(model, conf){
         lazyLoad = (conf.lazyLoad)? conf.lazyLoad : false;
         margin = (conf.margin)?  conf.margin : 0;
     }
-    
+
+    this.calculatePicturesSizes = function(width, height) {
+        var resize = new Resize(model.pictures, heightProportion);
+        var picturesSizes = resize.doResize(width, height);
+        return picturesSizes;
+    };
+
     this.displayPictures = function(picturesChanged){
         if (picturesChanged===false){
             return;
@@ -185,17 +114,17 @@ function AlbumPhotos(model, conf){
         }
         $view.show();
 
-        var resize = new Resize(model.pictures, heightProportion);
         currentWidth = $view.width();
-        var newPictures = resize.doResize(currentWidth, $(window).height());
-
+        var picturesSizes = self.calculatePicturesSizes(currentWidth, $(window).height());
+        var totalHeight = picturesSizes.totalHeight;
+        var newPictures = picturesSizes.pictures;
         var content = "";
         for (var i=0; i<newPictures.length; i++){
             var p = newPictures[i];
-            var params = {
+            var params = $.extend(model.pictures[i], {
                     width: p.newWidth-margin,
                     height: p.newHeight-margin
-            };
+            });
             if (!lazyLoad){
                 params.src = model.pictures[i].thumb;
             }
@@ -211,6 +140,8 @@ function AlbumPhotos(model, conf){
             });
         if (lazyLoad){
             startLazyLoading();
+        } else {
+            self.revealImages();
         }
     };
 
@@ -218,8 +149,7 @@ function AlbumPhotos(model, conf){
         var newWidth = $view.width();
         if (newWidth == currentWidth) return;
         currentWidth = $view.width();
-        var resize = new Resize(model.pictures, heightProportion);
-        var newPictures = resize.doResize(currentWidth, $(window).height());
+        var newPictures = self.calculatePicturesSizes(currentWidth, $(window).height());
         $viewList.children().each(function(index, item){
             var p = newPictures[index];
             var width = (p.newWidth-margin);
@@ -227,6 +157,7 @@ function AlbumPhotos(model, conf){
             $(this).css("width", width).css("height", height);
             $(this).find("img").attr("width", width).attr("height", height);
         });
+        self.revealImages();
     };
 
     function startLazyLoading(){
@@ -235,6 +166,7 @@ function AlbumPhotos(model, conf){
             if (index >= model.pictures.length){
                 return;
             }
+            self.revealImages();
             if (image.src == model.pictures[index].thumb){
                 index++;
                 loadNextPicture();
@@ -242,19 +174,32 @@ function AlbumPhotos(model, conf){
                 image.src = model.pictures[index].thumb;
             }
         }
-
+        $viewList.find("img").hide();
         var index = 0;
         var image = new Image();
         image.onload = function(){
             $viewList.find("img:eq("+index+")")
-                .attr("src", this.src)
-                .show();
+                  .data("img-src", this.src);
+//                .attr("src", this.src)
+//                .show();
             index++;
             loadNextPicture();
         };
 
         loadNextPicture();
     }
+
+    this.revealImages = function(){
+        var scrollTop = $(window).scrollTop();
+        var positionTop = ($viewList.parent().position())? $viewList.parent().position().top : 0;
+        var bottom = scrollTop + positionTop + $viewList.parent().height() - 30;
+        $viewList.find("img[src='']").each(function(index, item){
+            $item = $(item);
+            if ($item.parent().position().top <= bottom){
+                $item.hide().attr("src", $item.data("img-src")).fadeIn(1000);
+            }
+        });
+    };
 
     init();
 };/*
@@ -610,23 +555,25 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
 
     var currentPictureIndex = null;
     var currentFrame = null;
-    var prevFrame = null;
-    var nextFrame = null;
 
     var isOpened = false;
 
-    var padding = 15;
-    var headerHeight = 0;
+    var padding = 10;
 
-    var blurContainer = null;
+    var $blurContainer = null;
+
+    var MOUSE_WAIT_TIMEOUT = 2000;
+
+    var mouseOverNavArrows = false;
+
+    var $btnPrev = null;
+    var $btnNect = null;
 
     function init(){
-        $view = conf.view;
-        $viewList = (conf.listClass)? $view.find("."+conf.listClass) : createFramesContainer();
-        template = conf.template;
-        $detailsView = (conf.detailsView)? conf.detailsView : [];
+        setConfiguration();
 
-        createBlurContainer();
+        create$blurContainer();
+        createNavArrows();
 
         watch(model, "selectedPictureIndex", function(){
             onPictureSelected();
@@ -640,7 +587,7 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
             }
         });
 
-        $view.click(function(){
+        $blurContainer.click(function(){
             self.close();
         });
 
@@ -657,20 +604,58 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
                 self.close();
             }
         });
+
+    }
+
+    function setConfiguration(){
+        // Required
+        $view = conf.view;
+        template = conf.template;
+
+        // Optional
+        $viewList = (conf.listClass)? $view.find("."+conf.listClass) : createFramesContainer();
+        $detailsView = (conf.detailsView)? conf.detailsView : [];
     }
 
     function createFramesContainer(){
         var $container = $("<div class='frame-container'></div>");
         $view.append($container);
-        return $container
+        return $container;
     }
-    
-    function createBlurContainer(){
-        blurContainer = $('<div class="blur-container"></div>');
-        $view.append(blurContainer);
-        return blurContainer;
+
+    function create$blurContainer(){
+        $blurContainer = $('<div class="blur-container"></div>');
+        $view.append($blurContainer);
+        return $blurContainer;
     }
-    
+
+    function navArrowsHoverInHandler(){
+        mouseOverNavArrows = true;
+    }
+
+    function navArrowsHoverOutHandler(){
+        mouseOverNavArrows = false;
+    }
+
+    function createNavArrows(){
+        $btnPrev = $("<button class='btn-prev'><span>&lt;</span></button>");
+        $btnNext = $("<button class='btn-next'><span>&gt;</span></button>");
+        $btnPrev
+            .click(function(){
+                self.displayPrevPicture();
+            })
+            .hover(navArrowsHoverInHandler,
+                   navArrowsHoverOutHandler);
+        $btnNext
+            .click(function(){
+                self.displayNextPicture();
+            })
+            .hover(navArrowsHoverInHandler,
+                   navArrowsHoverOutHandler);
+        $view.append($btnPrev);
+        $view.append($btnNext);
+    }
+
     function onPictureSelected(){
         if (isOpened) {
             if (model.selectedPictureIndex === null){
@@ -679,8 +664,12 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
             return;
         }
         self.handleScroll();
+
+        MouseTimer.on("mousewait", MOUSE_WAIT_TIMEOUT, hideArrows);
+        $(document).on("mousemove", showArrows);
+
         self.displayPicture();
-        blurContainer.empty();
+        $blurContainer.empty();
     }
     
     function disableScroll(e){
@@ -697,6 +686,24 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
         $('body').off('mousewheel', disableScroll);
     };
 
+    function showArrows(){
+        $btnPrev.fadeIn();
+        $btnNext.fadeIn();
+    }
+
+    function hideArrows(){
+        if (mouseOverNavArrows) return;
+        $btnPrev.fadeOut();
+        $btnNext.fadeOut();
+    }
+
+    function repositionArrows(){
+        var height = $view.height();
+        var top = height / 2;
+        $btnPrev.css("top", top - $btnPrev.height() / 2);
+        $btnNext.css("top", top - $btnNext.height() / 2);
+    }
+
     this.hasPicturesToDisplay = function(){
         return (model.selectedPictureIndex !== null && 
                 model.selectedPictureIndex >= 0 && 
@@ -707,6 +714,8 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
     this.close = function(){
         isOpened = false;
         self.unhandleScroll();
+        MouseTimer.off("mousewait", MOUSE_WAIT_TIMEOUT, hideArrows);
+        $(document).off("mousemove", showArrows);
         $view.fadeOut("slow");
         model.selectedPictureIndex = null;
         Fullscreen.close();
@@ -719,7 +728,7 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
 
     function createCanvas(){
         var $canvas = $('<canvas class="blur"/>');
-        blurContainer.append($canvas);
+        $blurContainer.append($canvas);
         return $canvas;
     }
 
@@ -731,93 +740,37 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
         isOpened = true;
         $viewList.empty();
         createCurrentHighlight();
-        createLeftHighlight();
-        createRightHighlight();
         self.updateDisplay();
     };
 
-    // Move from left to right
-    this.displayPrevPicture = function(){
-        if (!self.hasPicturesToDisplay()) return;
-        $viewList.find(".large-photo").stop();
-        if (model.selectedPictureIndex === 0) return;
-
-        var newRightPicture = model.pictures[model.selectedPictureIndex];
-        model.selectedPictureIndex--;
-
-        var newCurrentFrame = prevFrame;
-        newCurrentFrame.removeClass("prev-frame").addClass("current-frame");
-        var newCurrentPicture = model.pictures[model.selectedPictureIndex];
-        var newCurrentDimension = calculateDimension(newCurrentPicture);
-        newCurrentFrame.find(".large-photo").animate({
-            left: newCurrentDimension.x
-        }, 500, "swing", function(){
-            showBlur(newCurrentFrame, newCurrentPicture);
-            showHighResolution(newCurrentFrame, newCurrentPicture);
-        });
-
-        var newRightFrame = currentFrame;
-        newRightFrame.removeClass("current-frame").addClass("next-frame");
-        var newRightDimension = calculateDimensionRight(newRightPicture);
-        newRightFrame.find(".large-photo").animate({
-            left: newRightDimension.x
-        }, 500, "swing");
-
-        if (nextFrame) nextFrame.remove();
-        nextFrame = currentFrame;
-        currentFrame = prevFrame;
-        prevFrame = null;
-
-        // Set Image to the new Left
-        if (model.selectedPictureIndex > 0){
-            createLeftHighlight();
-            var newLeftPicture = model.pictures[model.selectedPictureIndex - 1];
-            var dimension = calculateDimensionLeft(newLeftPicture);
-            setPosition(prevFrame, dimension);
-            showLowResolution(prevFrame, newLeftPicture);
-        }
-    };
-
-    // Move from right to left
     this.displayNextPicture = function(){
         if (!self.hasPicturesToDisplay()) return;
         $viewList.find(".large-photo").stop();
         if (model.selectedPictureIndex >= (model.pictures.length - 1)) return;
 
-        var newLeftPicture = model.pictures[model.selectedPictureIndex];
         model.selectedPictureIndex++;
 
-        var newCurrentFrame = nextFrame;
-        newCurrentFrame.removeClass("next-frame").addClass("current-frame");
-        var newCurrentPicture = model.pictures[model.selectedPictureIndex];
-        var newCurrentDimension = calculateDimension(newCurrentPicture);
-        newCurrentFrame.find(".large-photo").animate({
-            left: newCurrentDimension.x
-        }, 500, "swing", function(){
-            showBlur(newCurrentFrame, newCurrentPicture);
-            showHighResolution(newCurrentFrame, newCurrentPicture);
-        });
+        self.showCurrentSelectedPicture();
 
-        var newLeftFrame = currentFrame;
-        newLeftFrame.removeClass("current-frame").addClass("prev-frame");
-        var newLeftDimension = calculateDimensionLeft(newLeftPicture);
-        newLeftFrame.find(".large-photo").animate({
-            left: newLeftDimension.x
-        }, 500, "swing");
+    };
 
-        if (prevFrame) prevFrame.remove();
-        prevFrame = currentFrame;
-        currentFrame = nextFrame;
-        nextFrame = null;
+    this.displayPrevPicture = function(){
+        if (!self.hasPicturesToDisplay()) return;
+        $viewList.find(".large-photo").stop();
+        if (model.selectedPictureIndex === 0) return;
 
-        // Set Image to the new Right
-        if (model.selectedPictureIndex < (model.pictures.length - 1)){
-            createRightHighlight();
-            var newRightPicture = model.pictures[model.selectedPictureIndex + 1];
-            var dimension = calculateDimensionRight(newRightPicture);
-            setPosition(nextFrame, dimension);
-            showLowResolution(nextFrame, newRightPicture);
+        model.selectedPictureIndex--;
+
+        self.showCurrentSelectedPicture();
+    };
+
+    this.showCurrentSelectedPicture = function(){
+        var previousFrame = currentFrame;
+        if (previousFrame !== null){
+            previousFrame.remove();
         }
+        createCurrentHighlight();
+        self.updateDisplay();
     };
 
     function createCurrentHighlight(){
@@ -826,44 +779,20 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
         $viewList.append(currentFrame);
     }
 
-    function createLeftHighlight(){
-        if (prevFrame) prevFrame.remove();
-        prevFrame = createHighlight();
-        prevFrame.addClass("prev-frame");
-        $viewList.append(prevFrame);
-    }
-
-    function createRightHighlight(){
-        if (nextFrame) nextFrame.remove();
-        nextFrame = createHighlight();
-        nextFrame.addClass("next-frame");
-        $viewList.append(nextFrame);
-    }
-
     this.updateDisplay = function(){
         if (!self.hasPicturesToDisplay()) return;
         if (!isOpened) return;
-        $view.fadeIn("slow");
-        var picture, dimension;
+        $view.show();
         if (currentFrame) {
-            picture = model.pictures[model.selectedPictureIndex];
-            dimension = calculateDimension(picture);
+            var picture = model.pictures[model.selectedPictureIndex];
+            var dimension = calculateDimension(picture);
+            currentFrame.find(".large-photo").addClass("visible");
             setPosition(currentFrame, dimension);
+            repositionArrows();
             showLowResolution(currentFrame, picture);
             showHighResolution(currentFrame, picture);
             showBlur(currentFrame, picture);
-        }
-        if (prevFrame && model.selectedPictureIndex > 0) {
-            picture = model.pictures[model.selectedPictureIndex - 1];
-            dimension = calculateDimensionLeft(picture);
-            setPosition(prevFrame, dimension);
-            showLowResolution(prevFrame, picture);
-        }
-        if (nextFrame && model.selectedPictureIndex < model.pictures.length - 1) {
-            picture = model.pictures[model.selectedPictureIndex + 1];
-            dimension = calculateDimensionRight(picture);
-            setPosition(nextFrame, dimension);
-            showLowResolution(nextFrame, picture);
+            
         }
     };
 
@@ -880,14 +809,14 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
         var newHeight = Math.round(newWidth / picture.ratio);
         var x = 0;
         var y = Math.round((windowHeight - newHeight) / 2);
-        if (y < headerHeight){
-            newHeight = windowHeight - (headerHeight + (padding * 2));
+        if (y < 0){
+            newHeight = windowHeight - (padding * 2);
             newWidth = Math.round(newHeight * picture.ratio);
             y = 0;
             x = Math.round(($window.width() - newWidth) / 2);
         }
         x = (windowWidth - newWidth) / 2;
-        y = ((windowHeight - headerHeight - newHeight) / 2) + headerHeight;
+        y = (windowHeight - newHeight) / 2;
         return {newWidth: newWidth, newHeight: newHeight, x:x, y:y};
     }
 
@@ -938,12 +867,12 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
     function showBlur(frame, picture){
         clearTimeout(self.blurTimeout);
         self.blurTimeout = setTimeout(function(){
-            blurContainer.children().fadeOut(2000, function(){
+            $blurContainer.children().fadeOut(2000, function(){
                 $(this).remove();
             });
             var $blur = createCanvas();
             boxBlurImage(frame.find('.low-res').get(0), $blur.get(0), 20, false, 2);
-            $blur.fadeIn(2000);
+            $blur.fadeIn(1000);
         }, 500);
     }
 
@@ -983,6 +912,8 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
     this.albuns = null;
     this.pictures = null;
     this.visibility = null;
+    this.token = null;
+    this.cover = null;
 
     this.loading = false;
 
@@ -990,9 +921,17 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
     this.highlightOn = false;
     this.detailsOn = false;
 
-    this.loadAlbum = function(albumPath){
+    this.loadAlbum = function(albumPath, resultHandler, errorHandler){
         self.loading = true;
-        delegate.get(albumPath, loadAlbumResultHandler, loadAlbumFailHandler);
+        delegate.get(albumPath, 
+                function(result){
+                    loadAlbumResultHandler(result);
+                    if (resultHandler !== undefined) resultHandler(result);
+                }, 
+                function(error){
+                    loadAlbumFailHandler(error);
+                    if (errorHandler !== undefined) errorHandler(error);
+                });
     };
 
     function loadAlbumResultHandler(result){
@@ -1029,9 +968,6 @@ function AlbumAjaxDelegate(){
 
 function AlbumHtmlDelegate(imgs){
     this.get = function(albumPath, resultHandler, failHandler){
-        if (imgs.length === 0){
-            return failHandler();
-        }
         var result = {
                 path: albumPath,
                 pictures: []
@@ -1040,19 +976,79 @@ function AlbumHtmlDelegate(imgs){
             $el = $(element);
             var ratio = parseFloat($el.attr("width")) / parseFloat($el.attr("height"));
             ratio = Math.round(ratio * 1000) / 1000;
-            var picture = {
+            var picture = $el.data();
+            $.extend(picture, {
                     width: $el.attr("width"),
                     height: $el.attr("height"),
                     thumb: $el.attr("src"),
                     url: $el.data("photo"),
                     highlight: $el.data("photo"),
                     ratio: ratio
-            };
+            });
             result.pictures.push(picture);
         });
         resultHandler(result);
     };
-};function Resize(pictures, heightProportion){
+};function MouseTimer(){
+    timers = {};
+
+    listenersWait = {};
+
+    function init(){
+        setMouseMoveHandler();
+    }
+
+    function setMouseMoveHandler(){
+        $(document).mousemove(function(event) {
+            for (var time in timers){
+                var timer = timers[time];
+                clearTimeout(timer);
+                delete timers[time];
+                addTimer(time);
+            }
+        });
+    }
+
+    function addTimer(time){
+        if (!timers[time]) {
+            timers[time] = setTimeout(function(){
+                for (var i in listenersWait[time]){
+                    var handler = listenersWait[time][i];
+                    handler();
+                }
+            }, time);
+        }
+    }
+
+    function mousewait(time, handler){
+        if (!listenersWait[time]){
+            listenersWait[time] = [];
+        }
+        listenersWait[time].push(handler);
+        addTimer(time);
+    }
+
+    this.on = function(event, time, handler){
+        if (event.toLowerCase() == "mousewait"){
+            mousewait(time, handler);
+        }
+    };
+
+    this.off = function(event, time, handler){
+        if (event.toLowerCase() == "mousewait"){
+            if (!listenersWait[time]) return;
+            var pos = listenersWait[time].indexOf(handler);
+            if (pos >= 0){
+                listenersWait[time].splice(pos, 1);
+            }
+        }
+    };
+
+    init();
+}
+
+var MouseTimer = new MouseTimer();
+;function Resize(pictures, heightProportion){
     this.pictures = pictures;
     this.HEIGHT_PROPORTION = 0.45;
     if (heightProportion){
@@ -1062,19 +1058,12 @@ function AlbumHtmlDelegate(imgs){
 
 Resize.prototype.doResize = function(viewWidth, viewHeight){
     viewWidth = Math.floor(viewWidth);
-//    viewWidth--;
     var idealHeight = parseInt(viewHeight * this.HEIGHT_PROPORTION);
 
     var sumWidths = this.sumWidth(idealHeight);
     var rows = Math.ceil(sumWidths / viewWidth);
 
-//    if (rows <= 1){
-//        // fallback to standard size
-//        console.log("1 row")
-//        this.resizeToSameHeight(idealHeight)
-//    } else {
-      return this.resizeUsingLinearPartitions(rows, viewWidth);
-//    }
+    return this.resizeUsingLinearPartitions(rows, viewWidth);
 };
 
 Resize.prototype.sumWidth = function(height){
@@ -1107,6 +1096,7 @@ Resize.prototype.resizeUsingLinearPartitions = function(rows, viewWidth){
     var partitions = linearPartition(weights, rows);
     var index = 0;
     var newDimensions = [];
+    var totalHeight = 0;
     for(i in partitions){
         partition = partitions[i];
         var rowList = [];
@@ -1120,6 +1110,7 @@ Resize.prototype.resizeUsingLinearPartitions = function(rows, viewWidth){
             summedRatios += p.ratio;
         }
         var rowHeight = (viewWidth / summedRatios);
+        totalHeight += rowHeight;
         var rowWidth = 0;
         for (j in rowList){
             p = rowList[j];
@@ -1130,7 +1121,7 @@ Resize.prototype.resizeUsingLinearPartitions = function(rows, viewWidth){
             newDimensions.push(dimension);
         }
     }
-    return newDimensions;
+    return {pictures: newDimensions, totalHeight: totalHeight};
 };
 
 function linearPartition(seq, k){

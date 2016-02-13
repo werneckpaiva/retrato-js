@@ -12,8 +12,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "retrato-js": "~0.0.1",
-    "headroom.js": "~0.7.0",
-    "watch": "*"
+    "retrato-js": "~0.1.10",
+    "headroom.js": "~0.7.0"
   }
 }

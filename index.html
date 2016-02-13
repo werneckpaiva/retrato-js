@@ -1,14 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Retrato Sample 1</title>
+<title>Retrato-js - Perfect balanced photo gallery plugin</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
 <script type="text/javascript" src="js/jquery.js"></script>
 <script type="text/javascript" src="js/mustache.js.js"></script>
-<script type="text/javascript" src="js/retrato-js.js"></script>
 <script type="text/javascript" src="js/watch.js"></script>
 <script type="text/javascript" src="js/headroom.js"></script>
+
+<script type="text/javascript" src="../retrato-js/src/mouse-timer.js"></script>
+<script type="text/javascript" src="../retrato-js/src/resize.js"></script>
+<script type="text/javascript" src="../retrato-js/src/fast-blur.js"></script>
+<script type="text/javascript" src="../retrato-js/src/album.js"></script>
+<script type="text/javascript" src="../retrato-js/src/model.js"></script>
+<script type="text/javascript" src="../retrato-js/src/highlight.js"></script>
 
 <link rel="stylesheet" href="css/retrato.css" />
 <script type="text/javascript">
@@ -17,7 +23,7 @@
 
         var model1 = new AlbumModel(new AlbumHtmlDelegate($("#album1 img")));
         var albumPhotos = new AlbumPhotos(model1, {
-            view: $("#album1"), 
+            view: $("#album1"),
             template: '<img src="{{src}}" width="{{width}}" height="{{height}}"/>',
             heightProportion: 0.25,
             margin: 2
@@ -27,7 +33,7 @@
             template: '<div class="photo-frame"><div class="large-photo"><img class="low-res" /><img class="high-res"/></div></div>'
         })
         model1.loadAlbum('/');
-        
+
     });
 </script>
 </head>
@@ -59,14 +65,18 @@
         <img src="photos/edinburgh_03_thumb.jpg" width="640" height="426" data-photo="photos/edinburgh_03.jpg"/>
         <img src="photos/edinburgh_04_thumb.jpg" width="640" height="426" data-photo="photos/edinburgh_04.jpg"/>
     </div>
-    <h2><a id="what-is">What is Retrato-js?</a></h2>
-    <p></p>
-    <h2><a id="getting-started">Getting started</a></h2>
-    <div id="code-album1">
-        <div data-height="350" data-theme-id="8536" data-slug-hash="Grpyx" data-default-tab="js" data-user="werneckpaiva" class='codepen'>
-            <p>See the Pen <a href='http://codepen.io/werneckpaiva/pen/Grpyx/'>Grpyx</a> by Ricardo (<a href='http://codepen.io/werneckpaiva'>@werneckpaiva</a>) on <a href='http://codepen.io'>CodePen</a>.</p>
+    <div class="content">
+        <h2><a id="what-is">What is Retrato-js?</a></h2>
+        <p>
+            Retrato-js is a perfect balanced photo gallery plugin. Its goal is to display photo thumbs that resize according to the horizontal space available.
+        </p>
+        <h2><a id="getting-started">Getting started</a></h2>
+        <div id="code-album1">
+            <div data-height="350" data-theme-id="8536" data-slug-hash="Grpyx" data-default-tab="js" data-user="werneckpaiva" class='codepen'>
+                <p>See the Pen <a href='http://codepen.io/werneckpaiva/pen/Grpyx/'>Grpyx</a> by Ricardo (<a href='http://codepen.io/werneckpaiva'>@werneckpaiva</a>) on <a href='http://codepen.io'>CodePen</a>.</p>
+            </div>
+            <script async src="//codepen.io/assets/embed/ei.js"></script>
         </div>
-        <script async src="//codepen.io/assets/embed/ei.js"></script>
     </div>
 </div>
 </body>
