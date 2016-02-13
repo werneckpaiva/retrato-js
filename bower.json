@@ -24,7 +24,7 @@
     "tests"
   ],
   "main": [
-    "retrato.js",
-    "retrato.css"
+    "dist/retrato.js",
+    "dist/retrato.css"
   ]
 }
