@@ -87,7 +87,9 @@ function AlbumPhotos(model, conf){
     function setConfiguration(){
         // Required
         $view = conf.view;
-        template = conf.template;
+        template = (conf.template)?
+                        conf.template:
+                        '<img src="{{src}}" width="{{width}}" height="{{height}}"/>';
 
         // Optional
         $viewList = (conf.listClass)? $view.find("."+conf.listClass) : $view;
@@ -614,8 +616,9 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
     function setConfiguration(){
         // Required
         $view = conf.view;
-        template = conf.template;
-
+        template = (conf.template)?
+                        conf.template:
+                        '<div class="photo-frame"><div class="large-photo"><img class="low-res" /><img class="high-res"/></div></div>'
         // Optional
         $viewList = (conf.listClass)? $view.find("."+conf.listClass) : createFramesContainer();
         $detailsView = (conf.detailsView)? conf.detailsView : [];
@@ -675,13 +678,13 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
         self.displayPicture();
         $blurContainer.empty();
     }
-    
+
     function disableScroll(e){
         if (e.target.id == 'el') return;
         e.preventDefault();
         e.stopPropagation();
     }
-    
+
     this.handleScroll = function(){
         $('body').on('mousewheel', disableScroll);
     };
@@ -709,9 +712,9 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
     }
 
     this.hasPicturesToDisplay = function(){
-        return (model.selectedPictureIndex !== null && 
-                model.selectedPictureIndex >= 0 && 
-                model.pictures && 
+        return (model.selectedPictureIndex !== null &&
+                model.selectedPictureIndex >= 0 &&
+                model.pictures &&
                 model.pictures.length>=0);
     };
 
@@ -796,7 +799,7 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
             showLowResolution(currentFrame, picture);
             showHighResolution(currentFrame, picture);
             showBlur(currentFrame, picture);
-            
+
         }
     };
 
@@ -897,6 +900,7 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
     }
 
     function updateDetailValues(){
+        if ($detailsView.length == 0) return;
         var picture = model.pictures[model.selectedPictureIndex];
         if (!picture) return;
         $detailsView.find(".file-name").html(picture.filename);
