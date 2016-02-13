@@ -63,8 +63,9 @@ function Highlight(model, conf){
     function setConfiguration(){
         // Required
         $view = conf.view;
-        template = conf.template;
-
+        template = (conf.template)?
+                        conf.template:
+                        '<div class="photo-frame"><div class="large-photo"><img class="low-res" /><img class="high-res"/></div></div>'
         // Optional
         $viewList = (conf.listClass)? $view.find("."+conf.listClass) : createFramesContainer();
         $detailsView = (conf.detailsView)? conf.detailsView : [];
@@ -124,13 +125,13 @@ function Highlight(model, conf){
         self.displayPicture();
         $blurContainer.empty();
     }
-    
+
     function disableScroll(e){
         if (e.target.id == 'el') return;
         e.preventDefault();
         e.stopPropagation();
     }
-    
+
     this.handleScroll = function(){
         $('body').on('mousewheel', disableScroll);
     };
@@ -158,9 +159,9 @@ function Highlight(model, conf){
     }
 
     this.hasPicturesToDisplay = function(){
-        return (model.selectedPictureIndex !== null && 
-                model.selectedPictureIndex >= 0 && 
-                model.pictures && 
+        return (model.selectedPictureIndex !== null &&
+                model.selectedPictureIndex >= 0 &&
+                model.pictures &&
                 model.pictures.length>=0);
     };
 
@@ -245,7 +246,7 @@ function Highlight(model, conf){
             showLowResolution(currentFrame, picture);
             showHighResolution(currentFrame, picture);
             showBlur(currentFrame, picture);
-            
+
         }
     };
 
@@ -346,6 +347,7 @@ function Highlight(model, conf){
     }
 
     function updateDetailValues(){
+        if ($detailsView.length == 0) return;
         var picture = model.pictures[model.selectedPictureIndex];
         if (!picture) return;
         $detailsView.find(".file-name").html(picture.filename);

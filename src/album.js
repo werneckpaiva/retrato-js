@@ -87,7 +87,9 @@ function AlbumPhotos(model, conf){
     function setConfiguration(){
         // Required
         $view = conf.view;
-        template = conf.template;
+        template = (conf.template)?
+                        conf.template:
+                        '<img src="{{src}}" width="{{width}}" height="{{height}}"/>';
 
         // Optional
         $viewList = (conf.listClass)? $view.find("."+conf.listClass) : $view;

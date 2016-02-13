@@ -1,6 +1,6 @@
 {
   "name": "retrato-js",
-  "version": "0.1.11",
+  "version": "0.2.1",
   "homepage": "https://github.com/werneckpaiva/retrato-js",
   "authors": [
     "Ricardo Paiva <werneck.paiva@gmail.com>"
@@ -24,6 +24,7 @@
     "tests"
   ],
   "main": [
-    "retrato.js"
+    "retrato.js",
+    "retrato.css"
   ]
 }

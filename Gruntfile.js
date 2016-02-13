@@ -57,6 +57,14 @@ module.exports = function(grunt) {
                 }
             }
         },
+        copy: {
+            css: {
+                src: ['<%= config.src %>/*.css',],
+                dest: '<%= config.dist %>',
+                flatten: true,
+                expand: true
+            },
+        },
         watch: {
             scripts: {
                 files: ['<%= config.src %>/**/*'],
@@ -70,6 +78,6 @@ module.exports = function(grunt) {
     });
 
     // Default task(s).
-    grunt.registerTask('default', ['clean', 'concat', 'uglify']);
+    grunt.registerTask('default', ['clean', 'concat', 'uglify', 'copy']);
     grunt.registerTask('test', ['jshint', 'jasmine']);
 };

@@ -1,6 +1,6 @@
 {
   "name": "retrato-js",
-  "version": "0.1.11",
+  "version": "0.2.1",
   "description": "Perfect balanced Photo Album javascript plugin",
   "directories": {
     "test": "spec"
@@ -27,7 +27,8 @@
     "grunt-contrib-watch": "^0.6.1",
     "grunt-contrib-clean": "^0.5.0",
     "grunt-contrib-uglify": "^0.5.1",
-    "grunt-bower": "^0.14.0"
+    "grunt-bower": "^0.14.0",
+    "grunt-contrib-copy": "^0.8.2"
   },
   "dependencies": {}
 }
