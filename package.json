@@ -5,6 +5,9 @@
   "directories": {
     "test": "spec"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "clean": "rimraf dist",
     "lint": "eslint src spec --fix",
