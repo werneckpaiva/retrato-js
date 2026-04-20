@@ -16,7 +16,7 @@ The project uses standard NPM scripts for all development tasks. Do NOT use Grun
   - Removes the `dist/` and `spec/vendor/` directories.
 
 ## Testing
-Tests are written with Jasmine and run in a headless browser using `jasmine-browser-runner` and Puppeteer.
+Tests are written with Jasmine and run in a headless browser using `jasmine-browser-runner` and Puppeteer. In CI, these are automatically executed by **GitHub Actions**.
 
 - **Run Tests**: `npm test`
   - This first runs `npm run pretest` which copies dependencies from `node_modules` into `src/vendor/` so they can be served by the test runner.

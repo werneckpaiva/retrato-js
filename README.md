@@ -1,6 +1,6 @@
 # Retrato-JS
 
-[![Build Status](https://travis-ci.org/werneckpaiva/retrato-js.svg?branch=master)](https://travis-ci.org/werneckpaiva/retrato-js)
+[![CI](https://github.com/werneckpaiva/retrato-js/actions/workflows/ci.yml/badge.svg)](https://github.com/werneckpaiva/retrato-js/actions/workflows/ci.yml)
 
 A perfectly balanced Photo Album JavaScript plugin.
 
