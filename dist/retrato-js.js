@@ -30,7 +30,7 @@ var Fullscreen = {
     },
 
     close: function close() {
-        if (document.fullscreenElement && document.exitFullscreen) {
+        if (document.exitFullscreen) {
             document.exitFullscreen();
         } else if (document.webkitExitFullscreen) {
             document.webkitExitFullscreen();
@@ -208,7 +208,8 @@ function AlbumPhotos(model, conf){
     };
 
     init();
-};/*
+}
+/*
 
 Superfast Blur - a fast Box Blur For Canvas
 
@@ -551,7 +552,8 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
         }
     }
     context.putImageData( imageData, top_x, top_y );
-};function Highlight(model, conf){
+}
+function Highlight(model, conf){
     var self = this;
 
     var $view = null;
@@ -618,7 +620,7 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
         $view = conf.view;
         template = (conf.template)?
                         conf.template:
-                        '<div class="photo-frame"><div class="large-photo"><img class="low-res" /><img class="high-res"/></div></div>'
+                        '<div class="photo-frame"><div class="large-photo"><img class="low-res" /><img class="high-res"/></div></div>';
         // Optional
         $viewList = (conf.listClass)? $view.find("."+conf.listClass) : createFramesContainer();
         $detailsView = (conf.detailsView)? conf.detailsView : [];
@@ -900,7 +902,7 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
     }
 
     function updateDetailValues(){
-        if ($detailsView.length == 0) return;
+        if ($detailsView.length === 0) return;
         var picture = model.pictures[model.selectedPictureIndex];
         if (!picture) return;
         $detailsView.find(".file-name").html(picture.filename);
@@ -911,7 +913,8 @@ function boxBlurCanvasRGB( canvas, top_x, top_y, width, height, radius, iteratio
 
     init();
 }
-;function AlbumModel(albumDelegate){
+
+function AlbumModel(albumDelegate){
 
     var delegate = albumDelegate;
     var self = this;
@@ -997,7 +1000,8 @@ function AlbumHtmlDelegate(imgs){
         });
         resultHandler(result);
     };
-};function MouseTimer(){
+}
+function MouseTimer(){
     timers = {};
 
     listenersWait = {};
@@ -1056,7 +1060,8 @@ function AlbumHtmlDelegate(imgs){
 }
 
 var MouseTimer = new MouseTimer();
-;function Resize(pictures, heightProportion){
+
+function Resize(pictures, heightProportion){
     this.pictures = pictures;
     this.HEIGHT_PROPORTION = 0.45;
     if (heightProportion){

@@ -1,90 +1,173 @@
+# Retrato-JS
+
 [![Build Status](https://travis-ci.org/werneckpaiva/retrato-js.svg?branch=master)](https://travis-ci.org/werneckpaiva/retrato-js)
 
-Retrato-JS
-==========
+A perfectly balanced Photo Album JavaScript plugin.
 
-Perfect balanced Photo Album javascript plugin.
+Retrato-JS uses a smart algorithm to render photo albums where picture sizes are balanced according to the window width and height, creating a seamless and beautiful gallery layout.
 
-## About
+## Features
 
-This project aims to create a javascript plugin that render a photo album using an algorithm that balances the picture sizes according with the window width and height.
+- **Balanced Layout**: Automatically calculates optimal image sizes to fill the row width.
+- **Responsive**: Re-adjusts the layout on window resize.
+- **Lazy Loading**: Efficiently loads images only when they are about to become visible.
+- **Highlight Mode**: Includes a full-screen image viewer with:
+  - Navigation arrows (prev/next).
+  - Keyboard support (Arrows and Esc).
+  - Low-res to high-res transition for smooth loading.
+  - Background blur effect using the current image.
+- **Flexible Data Sources**: Load images directly from HTML or via JSON API.
 
-You can use standalone or with [retrato](https://github.com/werneckpaiva/retrato/) project.
+## Installation
 
-Installation:
--------------
-
-Installing via Bower
-
+### Via NPM
+```bash
+npm install retrato-js
 ```
-bower install retrato-js
-```
 
-Or you can download it directly at https://github.com/werneckpaiva/retrato-js/releases
+### Manual Download
+Download the latest release from the [GitHub Releases](https://github.com/werneckpaiva/retrato-js/releases) page.
 
-### Dependency:
-All the dependencies are downloaded when you use Bower
-- jquery
-- mustache.js
-- watch
+## Quick Start
 
-## Loading required files:
+### 1. Load Required Files
+Include jQuery, Mustache.js, Watch.js, and Retrato-JS in your HTML (find them in `node_modules` or use a CDN):
+
 ```html
-<script type="text/javascript" src="js/jquery.js"></script>
-<script type="text/javascript" src="js/mustache.js.js"></script>
-<script type="text/javascript" src="js/watch.js"></script>
-<script type="text/javascript" src="js/retrato-js.js"></script>
+<link rel="stylesheet" href="dist/retrato.css" />
 
-<link rel="stylesheet" href="css/retrato.css" />
+<script src="path/to/jquery.js"></script>
+<script src="path/to/mustache.js"></script>
+<script src="path/to/watch.js"></script>
+<script src="dist/retrato-js.min.js"></script>
 ```
 
-## HTML content
-
-Provide the images width and height. The data-photo is an attribute used when you click on the picture and the photo is highlighted.
+### 2. HTML Structure
+Create a container for your album and an optional section for the highlight viewer:
 
 ```html
 <div id="album">
-    <img src="photos/pic_01_thumb.jpg" width="640" height="426" data-photo="photos/pic_01.jpg"/>
-    <img src="photos/pic_02_thumb.jpg" width="426" height="640" data-photo="photos/pic_02.jpg"/>
-    <img src="photos/pic_03_thumb.jpg" width="640" height="426" data-photo="photos/pic_03.jpg"/>
-    <img src="photos/pic_04_thumb.jpg" width="426" height="640" data-photo="photos/pic_04.jpg"/>
-    <img src="photos/pic_05_thumb.jpg" width="640" height="426" data-photo="photos/pic_05.jpg"/>
-    <img src="photos/pic_06_thumb.jpg" width="640" height="426" data-photo="photos/pic_06.jpg"/>
+    <!-- Images will be rendered here -->
 </div>
+
+<!-- Optional Highlight Viewer -->
+<section id="highlight" class="retrato-highlight"></section>
 ```
 
-## Javascript
-
-Loading the album based on the img tags. It uses the imgs width and height to calculate the image proportion.
-
+### 3. Initialize
 ```javascript
-$(function(){
-    var model = new AlbumModel(new AlbumHtmlDelegate($("#album img")));
-    var albumPhotos = new AlbumPhotos(model1, {
+$(function() {
+    // 1. Initialize the model with a delegate
+    var delegate = new AlbumHtmlDelegate($("#album img"));
+    var model = new AlbumModel(delegate);
+
+    // 2. Initialize the AlbumPhotos component
+    var album = new AlbumPhotos(model, {
         view: $("#album"),
         heightProportion: 0.25,
         margin: 2
     });
+
+    // 3. Optional: Initialize the Highlight component
+    var highlight = new Highlight(model, {
+        view: $("#highlight")
+    });
+
+    // 4. Load the album
     model.loadAlbum('/');
 });
 ```
-### Attributes
-- view: jquery object that points to the album container (usually where the img tags are placed).
-- template: a string that represents the html used when creating the container for each image in the album.
-e.g. ```<img src="{{src}}" width="{{width}}" height="{{height}}"/>```
-- heightProportion: this represents the height proportion that each image should have.
-- margin: margin between pictures.
 
-## Highlight
-If you want to have an image highlight that opens when the user clicks on the image, you can instantiate the Highlight plugin.
+## Data Sources
 
-```html
-<section id="highlight" class="retrato-highlight"></section>
-```
+### HTML Delegate
+Uses existing `<img>` tags to populate the album. Useful for SEO and simple static pages.
 ```javascript
-var highlight = new Highlight(model, {
-    view: $("#highlight")
-})
+var delegate = new AlbumHtmlDelegate($("#source-images img"));
 ```
 
-[Try out](http://codepen.io/werneckpaiva/pen/Grpyx/)
+### Ajax Delegate
+Loads album data from a JSON API.
+```javascript
+var delegate = new AlbumAjaxDelegate();
+```
+The API should return a JSON object with a `pictures` array:
+```json
+{
+  "path": "/my-album",
+  "pictures": [
+    {
+      "thumb": "path/to/thumb.jpg",
+      "highlight": "path/to/large.jpg",
+      "width": 640,
+      "height": 480
+    }
+  ]
+}
+```
+
+## Configuration Options
+
+### AlbumPhotos Options
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `view` | jQuery Object | **Required** | The container where the album will be rendered. |
+| `template` | String | See below | HTML template for each image. |
+| `heightProportion` | Number | `0.45` | Preferred height of rows (0 to 1). |
+| `margin` | Number | `0` | Margin between images in pixels. |
+| `lazyLoad` | Boolean | `false` | Enable lazy loading of images. |
+| `listClass` | String | `null` | Optional class to find the list container inside `view`. |
+
+**Default Template:**
+```html
+<img src="{{src}}" width="{{width}}" height="{{height}}"/>
+```
+
+### Highlight Options
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `view` | jQuery Object | **Required** | The container for the highlight viewer. |
+| `template` | String | See below | HTML template for the frame. |
+| `detailsView`| jQuery Object | `[]` | Container to show image details. |
+
+**Default Template:**
+```html
+<div class="photo-frame">
+    <div class="large-photo">
+        <img class="low-res" />
+        <img class="high-res"/>
+    </div>
+</div>
+```
+
+## Development
+
+### Installation
+```bash
+npm install
+```
+
+### Build
+Generates a bundled and minified version in the `dist` folder.
+```bash
+npm run build
+```
+
+### Testing
+Runs the spec suite in a headless browser.
+```bash
+npm test
+```
+
+### Linting
+Checks code style with ESLint.
+```bash
+npm run lint
+```
+
+## Demo
+[Try it out on CodePen](http://codepen.io/werneckpaiva/pen/Grpyx/)
+
+## License
+Apache License 2.0
+

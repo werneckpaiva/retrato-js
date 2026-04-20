@@ -1,0 +1,21 @@
+{
+  "srcDir": "src",
+  "srcFiles": [
+    "vendor/jquery.js",
+    "vendor/mustache.js",
+    "vendor/watch.js",
+    "*.js"
+  ],
+  "specDir": "spec",
+  "specFiles": [
+    "**/*[Ss]pec.js"
+  ],
+  "helpers": [
+    "helpers/**/*.js"
+  ],
+  "vendor": [],
+  "browser": {
+    "name": "headlessChrome"
+  },
+  "defaultTimeout": 10000
+}

@@ -6,7 +6,14 @@
     "test": "spec"
   },
   "scripts": {
-    "test": "grunt test"
+    "clean": "rimraf dist",
+    "lint": "eslint src spec --fix",
+    "pretest": "mkdir -p src/vendor && cp node_modules/jquery/dist/jquery.js src/vendor/jquery.js && cp node_modules/mustache/mustache.js src/vendor/mustache.js && cp node_modules/watchjs/src/watch.js src/vendor/watch.js",
+    "test": "jasmine-browser-runner runSpecs",
+    "build:js": "concat -o dist/retrato-js.js src/album.js src/fast-blur.js src/highlight.js src/model.js src/mouse-timer.js src/resize.js",
+    "build:min": "terser dist/retrato-js.js -o dist/retrato-js.min.js --compress --mangle",
+    "build:css": "copyfiles -u 1 src/*.css dist",
+    "build": "npm run clean && mkdir -p dist && npm run build:js && npm run build:min && npm run build:css"
   },
   "repository": {
     "type": "git",
@@ -17,17 +24,18 @@
     "url": "https://github.com/werneckpaiva/retrato-js/issues"
   },
   "homepage": "https://github.com/werneckpaiva/retrato-js",
+  "dependencies": {
+    "jquery": "^3.7.1",
+    "mustache": "^4.2.0",
+    "watchjs": "^0.0.0"
+  },
   "devDependencies": {
-    "grunt": ">=1.5.3",
-    "grunt-bower": "^0.5.0",
-    "grunt-contrib-clean": ">=2.0.1",
-    "grunt-contrib-concat": ">=2.1.0",
-    "grunt-contrib-copy": ">=1.0.0",
-    "grunt-contrib-jasmine": ">=3.0.0",
-    "grunt-contrib-jshint": ">=3.2.0",
-    "grunt-contrib-uglify": ">=5.2.2",
-    "grunt-contrib-watch": ">=1.1.0",
-    "jasmine-node": "^1.16.0",
-    "load-grunt-tasks": "^5.1.0"
+    "concat": "^1.0.3",
+    "copyfiles": "^2.4.1",
+    "eslint": "^9.0.0",
+    "jasmine-browser-runner": "^2.5.0",
+    "puppeteer": "^24.0.0",
+    "rimraf": "^5.0.5",
+    "terser": "^5.30.0"
   }
 }

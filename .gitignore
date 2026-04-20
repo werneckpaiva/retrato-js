@@ -1,9 +1,7 @@
-# Created by http://www.gitignore.io
-
-### Bower ###
-bower_components
-
-### Node ###
-node_modules
-
+node_modules/
+dist/
+src/vendor/
+.grunt/
+.eslintcache
 _SpecRunner.html
+.DS_Store

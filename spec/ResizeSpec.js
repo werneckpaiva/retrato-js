@@ -17,7 +17,7 @@ describe("Resize pictures", function() {
     
     it("should resize 4 landscape pictures in 2 rows", function(){
         var picturesInput = [{ratio: LANDSCAPE}, {ratio:LANDSCAPE}, {ratio:LANDSCAPE}, {ratio:LANDSCAPE}];
-        var resize = new Resize(pictures);
+        var resize = new Resize(picturesInput);
         resize.HEIGHT_PROPORTION = 0.5;
         var pictures = resize.doResize(1100, 800).pictures;
 

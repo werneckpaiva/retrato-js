@@ -1,0 +1,29 @@
+{
+  "env": {
+    "browser": true,
+    "jquery": true,
+    "jasmine": true,
+    "es6": true
+  },
+  "extends": "eslint:recommended",
+  "globals": {
+    "AlbumModel": "writable",
+    "AlbumPhotos": "writable",
+    "AlbumHtmlDelegate": "writable",
+    "AlbumAjaxDelegate": "writable",
+    "Highlight": "writable",
+    "Resize": "writable",
+    "MouseTimer": "writable",
+    "Mustache": "readonly",
+    "watch": "readonly",
+    "unwatch": "readonly",
+    "linearPartition": "readonly"
+  },
+  "parserOptions": {
+    "ecmaVersion": 2018
+  },
+  "rules": {
+    "no-unused-vars": "warn",
+    "no-console": "off"
+  }
+}
